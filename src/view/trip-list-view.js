@@ -1,12 +1,10 @@
 import { createElement } from '@src/render';
 
-function createTripListTemplate() {
-  return '<ul class="trip-events__list"></ul>';
-}
+const tripListTemplate = '<ul class="trip-events__list"></ul>';
 
 export default class TripListView {
   getTemplate() {
-    return createTripListTemplate();
+    return tripListTemplate;
   }
 
   getElement() {
