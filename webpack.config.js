@@ -10,6 +10,11 @@ module.exports = {
     clean: true
   },
   devtool: 'source-map',
+  resolve: {
+    alias: {
+      '@src': path.resolve(__dirname, 'src')
+    }
+  },
   plugins: [
     new CopyPlugin({
       patterns: [
