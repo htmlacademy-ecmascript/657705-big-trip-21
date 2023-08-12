@@ -25,5 +25,7 @@
   },
   "browserslist": [
     "defaults"
-  ]
+  ],
+  "packageManager": "pnpm@8.6.12",
+  "type": "module"
 }
