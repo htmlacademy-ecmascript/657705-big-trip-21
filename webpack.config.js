@@ -46,7 +46,13 @@ export default {
             presets: ['@babel/preset-env']
           }
         }
-      }
+      },
+      {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
     ]
   }
 };
