@@ -1,18 +1,23 @@
-const path = require('path');
-const CopyPlugin = require('copy-webpack-plugin');
-const HtmlPlugin = require('html-webpack-plugin');
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 
-module.exports = {
+import HtmlPlugin from 'html-webpack-plugin';
+import CopyPlugin from 'copy-webpack-plugin';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+export default {
   entry: './src/main.js',
   output: {
     filename: 'bundle.[contenthash].js',
-    path: path.resolve(__dirname, 'build'),
+    path: resolve(__dirname, 'build'),
     clean: true
   },
   devtool: 'source-map',
   resolve: {
     alias: {
-      '@src': path.resolve(__dirname, 'src')
+      '@src': resolve(__dirname, 'src')
     }
   },
   plugins: [
@@ -41,7 +46,13 @@ module.exports = {
             presets: ['@babel/preset-env']
           }
         }
-      }
+      },
+      {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
     ]
   }
 };
