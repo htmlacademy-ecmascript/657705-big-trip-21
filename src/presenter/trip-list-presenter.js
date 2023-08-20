@@ -18,14 +18,21 @@ export default class TripListPresenter {
   init() {
     render(new SortView(), this.tripListContainer);
     render(this.tripListComponent, this.tripListContainer);
-    render(new EditView(), this.tripListComponent.getElement());
+    render(
+      new EditView({
+        event: this.events[0],
+        eventDestination: this.destinations.getById(this.events[0].destination),
+        typeOffers: this.offers.getByType(this.events[0].type)
+      }),
+      this.tripListComponent.getElement()
+    );
 
     this.events.forEach((event) => {
       render(
         new EventView({
           event,
           eventDestination: this.destinations.getById(event.destination),
-          eventOffers: this.offers.getByType(event.type)
+          typeOffers: this.offers.getByType(event.type)
         }),
         this.tripListComponent.getElement()
       );

@@ -1,4 +1,4 @@
-import { humanizeEventDate, humanizeEventDiffenceTime, humanizeEventTime } from '@src/utils';
+import { getSelectedOffers, humanizeEventDate, humanizeEventDiffenceTime, humanizeEventTime } from '@src/utils';
 
 function createOffersTemplate(eventOffers) {
   const offers = eventOffers.map((offer) =>
@@ -19,12 +19,14 @@ function createOffersTemplate(eventOffers) {
   `;
 }
 
-export function createEventTemplate({ event, eventDestination, eventOffers }) {
+export function createEventTemplate({ event, eventDestination, typeOffers }) {
 
   const eventDate = humanizeEventDate(event.dateFrom);
   const timeFrom = humanizeEventTime(event.dateFrom);
   const timeTo = humanizeEventTime(event.dateTo);
   const timeDuration = humanizeEventDiffenceTime(event.dateFrom, event.dateTo);
+
+  const selectedOffers = getSelectedOffers(event.offers, typeOffers);
 
   return /* html */ `
     <li class="trip-events__item">
@@ -45,7 +47,7 @@ export function createEventTemplate({ event, eventDestination, eventOffers }) {
         <p class="event__price">
           €&nbsp;<span class="event__price-value">${event.basePrice}</span>
         </p>
-        ${eventOffers.length !== 0 ? createOffersTemplate(eventOffers) : ''}
+        ${selectedOffers.length !== 0 ? createOffersTemplate(selectedOffers) : ''}
         <button class="event__favorite-btn ${(event.isFavorite) ? 'event__favorite-btn--active' : ''}" type="button">
           <span class="visually-hidden">Add to favorite</span>
           <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">

@@ -3,6 +3,7 @@ import duration from 'dayjs/plugin/duration.js';
 
 const DATE_FORMAT = 'MMM D';
 const TIME_FORMAT = 'HH:mm';
+const FORM_DATE_FORMAT = 'DD/MM/YY HH:mm';
 
 dayjs.extend(duration);
 
@@ -15,6 +16,16 @@ function getRandomInt(a = 1, b = 0) {
 
 function getRandomArrayElement(items) {
   return items[getRandomInt(0, items.length - 1)];
+}
+
+function getSelectedOffers(eventOffersIds, typeOffers) {
+  let offers = [];
+
+  if (eventOffersIds.length !== 0) {
+    offers = typeOffers.filter((offer) => eventOffersIds.includes(offer.id));
+  }
+
+  return offers;
 }
 
 function humanizeEventDate(dateFrom) {
@@ -33,4 +44,16 @@ function humanizeEventDiffenceTime(dateFrom, dateTo) {
   return dayjs.duration(millisecond).format('DD[D] HH[H] mm[M]');
 }
 
-export { getRandomArrayElement, getRandomInt, humanizeEventDate, humanizeEventTime, humanizeEventDiffenceTime };
+function humanizeFormDate(date) {
+  return dayjs(date).format(FORM_DATE_FORMAT);
+}
+
+export {
+  getRandomArrayElement,
+  getRandomInt,
+  humanizeEventDate,
+  humanizeEventTime,
+  humanizeEventDiffenceTime,
+  getSelectedOffers,
+  humanizeFormDate
+};

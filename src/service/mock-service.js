@@ -31,7 +31,7 @@ export default class MockService {
   generateOffers() {
     return TYPES.map((type) => ({
       type,
-      offers: Array.from({ length: getRandomInt(0, 2) }, () => generateOffer())
+      offers: Array.from({ length: getRandomInt(0, 5) }, () => generateOffer())
     }));
   }
 
@@ -44,7 +44,11 @@ export default class MockService {
 
       const offersByType = this.offers.find((offerByType) => offerByType.type === type);
 
-      const offersIds = (hasOffers) ? offersByType.offers.map((offers) => offers.id) : [];
+      const offersIds = (hasOffers)
+        ? offersByType.offers
+          .slice(0, getRandomInt(0, 5))
+          .map((offers) => offers.id)
+        : [];
 
       return generateEvent(type, destination.id, offersIds);
     });
