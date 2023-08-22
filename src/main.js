@@ -1,4 +1,4 @@
-import { render, RenderPosition } from '@src/render';
+import { render, RenderPosition } from './framework/render';
 
 import MockService from '@src/service/mock-service';
 import DestinationsModel from '@src/model/destinations-model';

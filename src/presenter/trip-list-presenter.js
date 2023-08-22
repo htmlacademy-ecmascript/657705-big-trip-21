@@ -1,4 +1,4 @@
-import { render } from '@src/render';
+import { render } from '@src/framework/render';
 
 import SortView from '@src/view/sort-view';
 import TripListView from '@src/view/trip-list-view';
@@ -24,7 +24,7 @@ export default class TripListPresenter {
         eventDestination: this.destinations.getById(this.events[0].destination),
         typeOffers: this.offers.getByType(this.events[0].type)
       }),
-      this.tripListComponent.getElement()
+      this.tripListComponent.element
     );
 
     this.events.forEach((event) => {
@@ -34,7 +34,7 @@ export default class TripListPresenter {
           eventDestination: this.destinations.getById(event.destination),
           typeOffers: this.offers.getByType(event.type)
         }),
-        this.tripListComponent.getElement()
+        this.tripListComponent.element
       );
     });
   }

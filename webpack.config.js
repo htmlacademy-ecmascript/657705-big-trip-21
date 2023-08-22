@@ -53,6 +53,10 @@ export default {
           fullySpecified: false,
         },
       },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader']
+      }
     ]
   }
 };
