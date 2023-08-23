@@ -5,9 +5,11 @@ export default class EditView extends AbstractView {
   #event = {};
   #eventDestination = {};
   #typeOffers = [];
-  #handleFormSubmit = null;
 
-  constructor({ event, eventDestination, typeOffers, onFormSubmit }) {
+  #handleFormSubmit = null;
+  #handleArrowBtnClick = null;
+
+  constructor({ event, eventDestination, typeOffers, onFormSubmit, onUpArrowBtn }) {
     super();
 
     this.#event = event;
@@ -15,7 +17,9 @@ export default class EditView extends AbstractView {
     this.#typeOffers = typeOffers;
 
     this.#handleFormSubmit = onFormSubmit;
+    this.#handleArrowBtnClick = onUpArrowBtn;
     this.element.addEventListener('submit', this.#formSubmitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#arrowBtnClickHandler);
   }
 
   get template() {
@@ -29,5 +33,10 @@ export default class EditView extends AbstractView {
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
     this.#handleFormSubmit();
+  };
+
+  #arrowBtnClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleArrowBtnClick();
   };
 }

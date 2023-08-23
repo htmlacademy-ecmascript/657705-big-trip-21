@@ -35,20 +35,40 @@ export default class TripListPresenter {
 
     const eventComponent = new EventView({
       ...eventData,
-      onEditClick
+      onDownArrowBtn
     });
 
     const editEventComponent = new EditView({
       ...eventData,
-      onFormSubmit
+      onFormSubmit,
+      onUpArrowBtn
     });
 
-    function onEditClick() {
+    function escKeydownHandler(evt) {
+      if (evt.key === 'Escape') {
+        evt.preventDefault();
+        showEventComponent();
+        removeKeydownEvent();
+      }
+    }
+
+    function removeKeydownEvent() {
+      document.removeEventListener('keydown', escKeydownHandler);
+    }
+
+    function onDownArrowBtn() {
       showEditComponent();
+      document.addEventListener('keydown', escKeydownHandler);
     }
 
     function onFormSubmit() {
       showEventComponent();
+      removeKeydownEvent();
+    }
+
+    function onUpArrowBtn() {
+      showEventComponent();
+      removeKeydownEvent();
     }
 
     function showEditComponent() {
