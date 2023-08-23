@@ -36,7 +36,7 @@ export default class MockService {
   }
 
   generateEvents() {
-    return Array.from({ length: 10 }, () => {
+    return Array.from({ length: getRandomInt(0, 5) }, () => {
       const type = getRandomArrayElement(TYPES);
       const destination = getRandomArrayElement(this.destinations);
 

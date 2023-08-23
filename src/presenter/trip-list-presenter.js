@@ -4,6 +4,7 @@ import SortView from '@src/view/sort-view';
 import TripListView from '@src/view/trip-list-view';
 import EditView from '@src/view/edit-view';
 import EventView from '@src/view/event-view';
+import NoEventView from '@src/view/no-event-view';
 
 export default class TripListPresenter {
   #tripListComponent = new TripListView();
@@ -20,6 +21,12 @@ export default class TripListPresenter {
   }
 
   init() {
+
+    if (this.#events.length === 0) {
+      render(new NoEventView(), this.#tripListContainer);
+      return;
+    }
+
     render(new SortView(), this.#tripListContainer);
     render(this.#tripListComponent, this.#tripListContainer);
 

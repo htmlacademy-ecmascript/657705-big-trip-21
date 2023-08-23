@@ -13,6 +13,10 @@ export default class InfoPresenter {
   }
 
   init() {
+    if (this.#events.length === 0) {
+      return;
+    }
+
     render(
       new InfoView({
         destinations: this.#destinations,
