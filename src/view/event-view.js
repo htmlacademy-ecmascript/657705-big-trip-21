@@ -1,30 +1,34 @@
-import { createElement } from '@src/render';
+import AbstractView from '@src/framework/view/abstract-view';
 import { createEventTemplate } from '@src/template/event-template';
 
-export default class EventView {
-  constructor({ event, eventDestination, typeOffers }) {
-    this.event = event;
-    this.eventDestination = eventDestination;
-    this.typeOffers = typeOffers;
+export default class EventView extends AbstractView {
+  #event = {};
+  #eventDestination = {};
+  #typeOffers = [];
+
+  #handleArrowBtnClick = null;
+
+  constructor({ event, eventDestination, typeOffers, onDownArrowBtn }) {
+    super();
+
+    this.#event = event;
+    this.#eventDestination = eventDestination;
+    this.#typeOffers = typeOffers;
+
+    this.#handleArrowBtnClick = onDownArrowBtn;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#arrowBtnClickHandler);
   }
 
-  getTemplate() {
+  get template() {
     return createEventTemplate({
-      event: this.event,
-      eventDestination: this.eventDestination,
-      typeOffers: this.typeOffers
+      event: this.#event,
+      eventDestination: this.#eventDestination,
+      typeOffers: this.#typeOffers
     });
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #arrowBtnClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleArrowBtnClick();
+  };
 }
