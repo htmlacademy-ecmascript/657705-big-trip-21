@@ -1,91 +1,64 @@
-import { render, replace } from '@src/framework/render';
+import { render } from '@src/framework/render';
+
+import EventPresenter from './event-presenter';
 
 import SortView from '@src/view/sort-view';
 import TripListView from '@src/view/trip-list-view';
-import EditView from '@src/view/edit-view';
-import EventView from '@src/view/event-view';
 import NoEventView from '@src/view/no-event-view';
 
 export default class TripListPresenter {
   #tripListComponent = new TripListView();
   #tripListContainer = document.querySelector('.trip-events');
 
-  #destinations = null;
-  #offers = null;
+  #destinationsModel = null;
+  #offersModel = null;
+  #eventsModel = null;
+
   #events = [];
 
   constructor({ destinationsModel, offersModel, eventsModel }) {
-    this.#destinations = destinationsModel;
-    this.#offers = offersModel;
-    this.#events = eventsModel.get();
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
+    this.#eventsModel = eventsModel;
   }
 
   init() {
 
+    this.#events = [...this.#eventsModel.get()];
+
     if (this.#events.length === 0) {
-      render(new NoEventView(), this.#tripListContainer);
+      this.#renderNoEvent();
       return;
     }
 
-    render(new SortView(), this.#tripListContainer);
-    render(this.#tripListComponent, this.#tripListContainer);
+    this.#renderSort();
+    this.#renderEventList();
+  }
 
+  #renderEventList() {
+    render(this.#tripListComponent, this.#tripListContainer);
     this.#events.forEach(this.#renderEvent);
   }
 
   #renderEvent = (event) => {
+    const eventPresenter = new EventPresenter({
+      eventContainer: this.#tripListComponent.element
+    });
+
     const eventData = {
       event,
-      eventDestination: this.#destinations.getById(event.destination),
-      typeOffers: this.#offers.getByType(event.type),
+      eventDestination: this.#destinationsModel.getById(event.destination),
+      typeOffers: [...this.#offersModel.getByType(event.type)],
     };
 
-    const eventComponent = new EventView({
-      ...eventData,
-      onDownArrowBtn
-    });
-
-    const editEventComponent = new EditView({
-      ...eventData,
-      onFormSubmit,
-      onUpArrowBtn
-    });
-
-    function escKeydownHandler(evt) {
-      if (evt.key === 'Escape') {
-        evt.preventDefault();
-        showEventComponent();
-        removeKeydownEvent();
-      }
-    }
-
-    function removeKeydownEvent() {
-      document.removeEventListener('keydown', escKeydownHandler);
-    }
-
-    function onDownArrowBtn() {
-      showEditComponent();
-      document.addEventListener('keydown', escKeydownHandler);
-    }
-
-    function onFormSubmit() {
-      showEventComponent();
-      removeKeydownEvent();
-    }
-
-    function onUpArrowBtn() {
-      showEventComponent();
-      removeKeydownEvent();
-    }
-
-    function showEditComponent() {
-      replace(editEventComponent, eventComponent);
-    }
-
-    function showEventComponent() {
-      replace(eventComponent, editEventComponent);
-    }
-
-    render(eventComponent, this.#tripListComponent.element);
+    eventPresenter.init(eventData);
   };
+
+  #renderNoEvent() {
+    render(new NoEventView(), this.#tripListContainer);
+  }
+
+  #renderSort() {
+    render(new SortView(), this.#tripListContainer);
+  }
 }
