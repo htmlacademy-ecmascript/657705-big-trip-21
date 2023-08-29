@@ -1,5 +1,5 @@
 function getUpdatedEvents(events, updatedEvent) {
-  return events.map((event) => event.id === updatedEvent.event.id ? updatedEvent.event : event);
+  return events.map((event) => event.id === updatedEvent.id ? updatedEvent : event);
 }
 
 export { getUpdatedEvents };
