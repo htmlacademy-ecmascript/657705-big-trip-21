@@ -1,26 +1,32 @@
-import { render, replace } from '@src/framework/render';
+import { remove, render, replace } from '@src/framework/render';
 
 import EventView from '@src/view/event-view';
 import EditView from '@src/view/edit-view';
 
 export default class EventPresenter {
   #eventContainer = null;
+  #handleDataChange = null;
 
   #eventComponent = null;
   #editEventComponent = null;
 
   #eventData = null;
 
-  constructor({ eventContainer }) {
+  constructor({ eventContainer, onDataChange }) {
     this.#eventContainer = eventContainer;
+    this.#handleDataChange = onDataChange;
   }
 
   init(eventData) {
     this.#eventData = eventData;
 
+    const prevEventComponent = this.#eventComponent;
+    const prevEditEventComponent = this.#editEventComponent;
+
     this.#eventComponent = new EventView({
       ...this.#eventData,
-      onDownArrowBtn: this.#onDownArrowtBtn
+      onDownArrowBtn: this.#onDownArrowtBtn,
+      onFavoriteClick: this.#handleFavoriteClick
     });
 
     this.#editEventComponent = new EditView({
@@ -29,7 +35,26 @@ export default class EventPresenter {
       onUpArrowBtn: this.#onUpArrowBtn
     });
 
-    render(this.#eventComponent, this.#eventContainer);
+    if (prevEventComponent === null || prevEditEventComponent === null) {
+      render(this.#eventComponent, this.#eventContainer);
+      return;
+    }
+
+    if (this.#eventContainer.contains(prevEventComponent.element)) {
+      replace(this.#eventComponent, prevEventComponent);
+    }
+
+    if (this.#eventContainer.contains(prevEditEventComponent.element)) {
+      replace(this.#editEventComponent, prevEditEventComponent);
+    }
+
+    remove(prevEventComponent);
+    remove(prevEditEventComponent);
+  }
+
+  destroy() {
+    remove(this.#eventComponent);
+    remove(this.#editEventComponent);
   }
 
   #showEventComponent() {
@@ -52,6 +77,14 @@ export default class EventPresenter {
 
   #onUpArrowBtn = () => {
     this.#showEventComponent();
+  };
+
+  #handleFavoriteClick = () => {
+
+    const changedData = { ...this.#eventData };
+    changedData.event.isFavorite = !changedData.event.isFavorite;
+
+    this.#handleDataChange(changedData);
   };
 
   #escKeydownHandler = (evt) => {

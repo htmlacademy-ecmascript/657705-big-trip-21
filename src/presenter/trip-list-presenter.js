@@ -1,4 +1,5 @@
 import { render } from '@src/framework/render';
+import { getUpdatedEvents } from '@src/utils/event-utils';
 
 import EventPresenter from './event-presenter';
 
@@ -16,6 +17,8 @@ export default class TripListPresenter {
 
   #events = [];
 
+  #eventPresenters = new Map();
+
   constructor({ destinationsModel, offersModel, eventsModel }) {
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
@@ -25,6 +28,8 @@ export default class TripListPresenter {
   init() {
 
     this.#events = [...this.#eventsModel.get()];
+
+    console.log(this.#events);
 
     if (this.#events.length === 0) {
       this.#renderNoEvent();
@@ -42,16 +47,18 @@ export default class TripListPresenter {
 
   #renderEvent = (event) => {
     const eventPresenter = new EventPresenter({
-      eventContainer: this.#tripListComponent.element
+      eventContainer: this.#tripListComponent.element,
+      onDataChange: this.#handleEventChange
     });
 
     const eventData = {
       event,
       eventDestination: this.#destinationsModel.getById(event.destination),
-      typeOffers: [...this.#offersModel.getByType(event.type)],
+      typeOffers: this.#offersModel.getByType(event.type)
     };
 
     eventPresenter.init(eventData);
+    this.#eventPresenters.set(event.id, eventPresenter);
   };
 
   #renderNoEvent() {
@@ -61,4 +68,14 @@ export default class TripListPresenter {
   #renderSort() {
     render(new SortView(), this.#tripListContainer);
   }
+
+  #clearEventList() {
+    this.#eventPresenters.forEach((evet) => evet.destroy());
+    this.#eventPresenters.clear();
+  }
+
+  #handleEventChange = (updatedEvent) => {
+    this.#events = getUpdatedEvents(this.#events, updatedEvent);
+    this.#eventPresenters.get(updatedEvent.event.id).init(updatedEvent);
+  };
 }
