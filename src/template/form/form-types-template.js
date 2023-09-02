@@ -3,6 +3,7 @@ import { TYPES } from '@src/mock/const';
 export function createFormTypesTemplate(eventType) {
   return TYPES.map((type) => {
     const lowerCaseType = type.toLowerCase();
+    const lowerCaseEventType = eventType.toLowerCase();
 
     return /*html */ `
       <div class="event__type-item">
@@ -12,7 +13,7 @@ export function createFormTypesTemplate(eventType) {
         type="radio"
         name="event-type"
         value="${lowerCaseType}"
-        ${(type === eventType) ? 'checked' : ''}>
+        ${(lowerCaseType === lowerCaseEventType) ? 'checked' : ''}>
         <label class="event__type-label  event__type-label--${lowerCaseType}" for="event-type-${lowerCaseType}-1">${type}</label>
       </div>
     `;

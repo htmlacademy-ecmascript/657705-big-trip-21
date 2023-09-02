@@ -1,7 +1,7 @@
-import AbstractView from '@src/framework/view/abstract-view';
+import AbstractStatefulView from '@src/framework/view/abstract-stateful-view';
 import { createEditTemplate } from '@src/template/form/form-template';
 
-export default class EditView extends AbstractView {
+export default class EditView extends AbstractStatefulView {
   #event = {};
   #eventDestination = {};
   #typeOffers = [];
@@ -12,22 +12,29 @@ export default class EditView extends AbstractView {
   constructor({ event, eventDestination, typeOffers, onFormSubmit, onUpArrowBtn }) {
     super();
 
-    this.#event = event;
-    this.#eventDestination = eventDestination;
-    this.#typeOffers = typeOffers;
+    this._setState({
+      event,
+      eventDestination,
+      typeOffers
+    });
 
     this.#handleFormSubmit = onFormSubmit;
     this.#handleArrowBtnClick = onUpArrowBtn;
-    this.element.addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#arrowBtnClickHandler);
+
+    this._restoreHandlers();
   }
 
   get template() {
-    return createEditTemplate({
-      event: this.#event,
-      eventDestination: this.#eventDestination,
-      typeOffers: this.#typeOffers
-    });
+    return createEditTemplate(this._state);
+  }
+
+  _restoreHandlers() {
+    this.element
+      .addEventListener('submit', this.#formSubmitHandler);
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#arrowBtnClickHandler);
+    this.element.querySelector('.event__type-group')
+      .addEventListener('change', this.#typeChangeHandler);
   }
 
   #formSubmitHandler = (evt) => {
@@ -38,5 +45,15 @@ export default class EditView extends AbstractView {
   #arrowBtnClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleArrowBtnClick();
+  };
+
+  #typeChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      event: {
+        ...this._state.event,
+        type: evt.target.value
+      }
+    });
   };
 }
