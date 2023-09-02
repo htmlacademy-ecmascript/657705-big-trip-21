@@ -48,6 +48,8 @@ function humanizeFormDate(date) {
   return dayjs(date).format(FORM_DATE_FORMAT);
 }
 
+const capitalize = (str) => `${str.charAt(0).toUpperCase()}${str.slice(1)}`;
+
 export {
   getRandomArrayElement,
   getRandomInt,
@@ -55,5 +57,6 @@ export {
   humanizeEventTime,
   humanizeEventDiffenceTime,
   getSelectedOffers,
-  humanizeFormDate
+  humanizeFormDate,
+  capitalize
 };

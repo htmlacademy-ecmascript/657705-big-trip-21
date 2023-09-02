@@ -1,3 +1,4 @@
+import { capitalize } from '@src/utils';
 import AbstractStatefulView from '@src/framework/view/abstract-stateful-view';
 import { createEditTemplate } from '@src/template/form/form-template';
 
@@ -6,10 +7,12 @@ export default class EditView extends AbstractStatefulView {
   #eventDestination = {};
   #typeOffers = [];
 
+  #getTypeOffers = null;
+
   #handleFormSubmit = null;
   #handleArrowBtnClick = null;
 
-  constructor({ event, eventDestination, typeOffers, onFormSubmit, onUpArrowBtn }) {
+  constructor({ event, eventDestination, typeOffers, onFormSubmit, onUpArrowBtn, getTypeOffers }) {
     super();
 
     this._setState({
@@ -18,10 +21,14 @@ export default class EditView extends AbstractStatefulView {
       typeOffers
     });
 
+    this.#getTypeOffers = getTypeOffers;
+
     this.#handleFormSubmit = onFormSubmit;
     this.#handleArrowBtnClick = onUpArrowBtn;
 
     this._restoreHandlers();
+
+    console.log(this._state);
   }
 
   get template() {
@@ -52,8 +59,12 @@ export default class EditView extends AbstractStatefulView {
     this.updateElement({
       event: {
         ...this._state.event,
-        type: evt.target.value
-      }
+        type: evt.target.value,
+        offers: []
+      },
+      typeOffers: [
+        ...this.#getTypeOffers(capitalize(evt.target.value))
+      ]
     });
   };
 }

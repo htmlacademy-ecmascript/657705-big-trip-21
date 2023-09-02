@@ -52,6 +52,7 @@ export default class EventPresenter {
 
     this.#editEventComponent = new EditView({
       ...eventData,
+      getTypeOffers: this.#getTypeOffers,
       onFormSubmit: this.#onFormSubmit,
       onUpArrowBtn: this.#onUpArrowBtn
     });
@@ -126,4 +127,6 @@ export default class EventPresenter {
       this.#showEventComponent();
     }
   };
+
+  #getTypeOffers = (type) => this.#offersModel.getByType(type);
 }

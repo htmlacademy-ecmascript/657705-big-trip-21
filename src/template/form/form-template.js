@@ -18,7 +18,7 @@ export function createEditTemplate({ event, eventDestination, typeOffers }) {
           <div class="event__type-list">
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Event type</legend>
-              ${createFormTypesTemplate(event.type)}
+              ${createFormTypesTemplate(event.type, typeOffers)}
             </fieldset>
           </div>
         </div>
@@ -58,7 +58,7 @@ export function createEditTemplate({ event, eventDestination, typeOffers }) {
         </button>
       </header>
       <section class="event__details">
-        ${event.offers.length !== 0 ? createFormOffersTemplate(event.offers, typeOffers) : ''}
+        ${typeOffers.length !== 0 ? createFormOffersTemplate(event.offers, typeOffers) : ''}
         <section class="event__section  event__section--destination">
           <h3 class="event__section-title  event__section-title--destination">${eventDestination.name}</h3>
           <p class="event__destination-description">${eventDestination.description}</p>
