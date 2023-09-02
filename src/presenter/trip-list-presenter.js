@@ -1,91 +1,82 @@
-import { render, replace } from '@src/framework/render';
+import { render } from '@src/framework/render';
+import { getUpdatedEvents } from '@src/utils/event-utils';
+
+import EventPresenter from './event-presenter';
 
 import SortView from '@src/view/sort-view';
 import TripListView from '@src/view/trip-list-view';
-import EditView from '@src/view/edit-view';
-import EventView from '@src/view/event-view';
 import NoEventView from '@src/view/no-event-view';
 
 export default class TripListPresenter {
   #tripListComponent = new TripListView();
   #tripListContainer = document.querySelector('.trip-events');
 
-  #destinations = null;
-  #offers = null;
+  #destinationsModel = null;
+  #offersModel = null;
+  #eventsModel = null;
+
   #events = [];
 
+  #eventPresenters = new Map();
+
   constructor({ destinationsModel, offersModel, eventsModel }) {
-    this.#destinations = destinationsModel;
-    this.#offers = offersModel;
-    this.#events = eventsModel.get();
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
+    this.#eventsModel = eventsModel;
   }
 
   init() {
 
+    this.#events = this.#eventsModel.get();
+
     if (this.#events.length === 0) {
-      render(new NoEventView(), this.#tripListContainer);
+      this.#renderNoEvent();
       return;
     }
 
-    render(new SortView(), this.#tripListContainer);
-    render(this.#tripListComponent, this.#tripListContainer);
+    this.#renderSort();
+    this.#renderEventList();
+  }
 
+  #renderEventList() {
+    render(this.#tripListComponent, this.#tripListContainer);
     this.#events.forEach(this.#renderEvent);
   }
 
   #renderEvent = (event) => {
-    const eventData = {
-      event,
-      eventDestination: this.#destinations.getById(event.destination),
-      typeOffers: this.#offers.getByType(event.type),
-    };
+    const eventPresenter = new EventPresenter({
+      eventContainer: this.#tripListComponent.element,
 
-    const eventComponent = new EventView({
-      ...eventData,
-      onDownArrowBtn
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersModel,
+
+      onDataChange: this.#handleEventChange,
+      onModeChange: this.#handleModeChange
     });
 
-    const editEventComponent = new EditView({
-      ...eventData,
-      onFormSubmit,
-      onUpArrowBtn
-    });
+    eventPresenter.init(event);
+    this.#eventPresenters.set(event.id, eventPresenter);
+  };
 
-    function escKeydownHandler(evt) {
-      if (evt.key === 'Escape') {
-        evt.preventDefault();
-        showEventComponent();
-        removeKeydownEvent();
-      }
-    }
+  #renderNoEvent() {
+    render(new NoEventView(), this.#tripListContainer);
+  }
 
-    function removeKeydownEvent() {
-      document.removeEventListener('keydown', escKeydownHandler);
-    }
+  #renderSort() {
+    render(new SortView(), this.#tripListContainer);
+  }
 
-    function onDownArrowBtn() {
-      showEditComponent();
-      document.addEventListener('keydown', escKeydownHandler);
-    }
+  #clearEventList() {
+    this.#eventPresenters.forEach((event) => event.destroy());
+    this.#eventPresenters.clear();
+  }
 
-    function onFormSubmit() {
-      showEventComponent();
-      removeKeydownEvent();
-    }
+  #handleEventChange = (updatedEvent) => {
+    this.#events = getUpdatedEvents(this.#events, updatedEvent);
+    this.#eventPresenters.get(updatedEvent.id).init(updatedEvent);
+  };
 
-    function onUpArrowBtn() {
-      showEventComponent();
-      removeKeydownEvent();
-    }
-
-    function showEditComponent() {
-      replace(editEventComponent, eventComponent);
-    }
-
-    function showEventComponent() {
-      replace(eventComponent, editEventComponent);
-    }
-
-    render(eventComponent, this.#tripListComponent.element);
+  #handleModeChange = () => {
+    this.#eventPresenters.forEach((presenter) => presenter.resetView());
   };
 }
