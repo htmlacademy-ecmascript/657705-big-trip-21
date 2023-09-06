@@ -3,13 +3,19 @@ import { html } from '@src/utils/utils';
 import AbstractStatefulView from '@src/framework/view/abstract-stateful-view';
 
 export default class EditView extends AbstractStatefulView {
+  #getTypeOffers = null;
+  #getDestination = null;
+
   #handleFormSubmit = null;
   #handleArrowBtnClick = null;
 
-  constructor({ data, onFormSubmit, onUpArrowBtn }) {
+  constructor({ data, getTypeOffers, getDestination, onFormSubmit, onUpArrowBtn }) {
     super();
 
     this._setState(data);
+
+    this.#getTypeOffers = getTypeOffers;
+    this.#getDestination = getDestination;
 
     this.#handleFormSubmit = onFormSubmit;
     this.#handleArrowBtnClick = onUpArrowBtn;
@@ -28,11 +34,13 @@ export default class EditView extends AbstractStatefulView {
       .addEventListener('click', this.#arrowBtnClickHandler);
     this.element.querySelector('.event__type-group')
       .addEventListener('change', this.#typeChangeHandler);
+    this.element.querySelector('.event__input--destination')
+      .addEventListener('change', this.#destinationChangeHandler);
   }
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit(this._state.event);
+    this.#handleFormSubmit(this._state);
   };
 
   #arrowBtnClickHandler = (evt) => {
@@ -42,11 +50,30 @@ export default class EditView extends AbstractStatefulView {
 
   #typeChangeHandler = (evt) => {
     evt.preventDefault();
+
+    const newOffers = this.#getTypeOffers(evt.target.value);
+
     this.updateElement({
-      event: {
-        ...this._state.event,
-        type: evt.target.value,
-        offers: []
+      type: evt.target.value,
+      offers: newOffers.map((offer) => ({
+        ...offer,
+        isSelected: false
+      }))
+    });
+  };
+
+  #destinationChangeHandler = (evt) => {
+    const newDestination = this._state.allDestinations.find((destination) => destination.name === evt.target.value);
+
+    if (!newDestination) {
+      return;
+    }
+
+    const newDestinationInfo = this.#getDestination(newDestination.id);
+
+    this.updateElement({
+      destination: {
+        ...newDestinationInfo
       }
     });
   };
@@ -57,6 +84,10 @@ export default class EditView extends AbstractStatefulView {
 
   get template() {
     return this.#createEditTemplate(this._state);
+  }
+
+  reset(event) {
+    this.updateElement(event);
   }
 
   #createEditTemplate() {
@@ -80,9 +111,8 @@ export default class EditView extends AbstractStatefulView {
   }
 
   #createTypeFieldHtml() {
-    const { type } = this._state;
+    const { type: currentType, allTypes } = this._state;
 
-    //TODO: FIELDSET
     return html`
       <div class="event__type-wrapper">
         <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -91,7 +121,7 @@ export default class EditView extends AbstractStatefulView {
             class="event__type-icon"
             width="17"
             height="17"
-            src="img/icons/${type}.png"
+            src="img/icons/${currentType}.png"
             alt="Event type icon"
           >
         </label>
@@ -99,6 +129,24 @@ export default class EditView extends AbstractStatefulView {
         <div class="event__type-list">
           <fieldset class="event__type-group">
             <legend class="visually-hidden">Event type</legend>
+            ${allTypes.map((type) => html`
+              <div class="event__type-item">
+                <input
+                  id="event-type-${type}-1"
+                  class="event__type-input  visually-hidden"
+                  type="radio"
+                  name="event-type"
+                  value="${type}"
+                  ${currentType === type ? 'checked' : ''}
+                >
+                <label
+                  class="event__type-label  event__type-label--${type}"
+                  for="event-type-${type}-1"
+                >
+                  ${type}
+                </label>
+              </div>
+            `)}
           </fieldset>
         </div>
       </div>
@@ -106,9 +154,8 @@ export default class EditView extends AbstractStatefulView {
   }
 
   #createDestinationFieldHtml() {
-    const { type, destination } = this._state;
+    const { type, destination: currentDestination, allDestinations } = this._state;
 
-    //TODO: DATALIST
     return html`
       <div class="event__field-group  event__field-group--destination">
         <label class="event__label  event__type-output" for="event-destination-1">
@@ -119,9 +166,15 @@ export default class EditView extends AbstractStatefulView {
           id="event-destination-1"
           type="text"
           name="event-destination"
-          value="${destination.name}"
+          value="${currentDestination.name}"
           list="destination-list-1"
         >
+
+        <datalist id="destination-list-1">
+          ${allDestinations.map((destination) => html`
+            <option value="${destination.name}"></option>
+          `)}
+        </datalist>
       </div>
     `;
   }
