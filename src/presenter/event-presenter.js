@@ -45,14 +45,13 @@ export default class EventPresenter {
     const prevEditEventComponent = this.#editEventComponent;
 
     this.#eventComponent = new EventView({
-      ...eventData,
+      data: this.#parseEventToState(eventData),
       onDownArrowBtn: this.#onDownArrowtBtn,
-      onFavoriteClick: this.#handleFavoriteClick
+      onFavoriteBtn: this.#onFavoriteBtn
     });
 
     this.#editEventComponent = new EditView({
-      ...eventData,
-      getTypeOffers: this.#getTypeOffers,
+      data: this.#parseEventToState(eventData),
       onFormSubmit: this.#onFormSubmit,
       onUpArrowBtn: this.#onUpArrowBtn
     });
@@ -100,11 +99,16 @@ export default class EventPresenter {
     this.#mode = Mode.EDITING;
   }
 
+  /**
+   * Handlers
+   */
+
   #onDownArrowtBtn = () => {
     this.#showEditComponent();
   };
 
-  #onFormSubmit = () => {
+  #onFormSubmit = (event) => {
+    this.#handleDataChange(event);
     this.#showEventComponent();
   };
 
@@ -112,13 +116,9 @@ export default class EventPresenter {
     this.#showEventComponent();
   };
 
-  #handleFavoriteClick = () => {
-    const changedEvent = {
-      ...this.#event,
-      isFavorite: !this.#event.isFavorite
-    };
-
-    this.#handleDataChange(changedEvent);
+  #onFavoriteBtn = (changedEvent) => {
+    const event = this.#parseStateToEvent(changedEvent);
+    this.#handleDataChange(event);
   };
 
   #escKeydownHandler = (evt) => {
@@ -128,5 +128,28 @@ export default class EventPresenter {
     }
   };
 
-  #getTypeOffers = (type) => this.#offersModel.getByType(type);
+  /**
+   * State
+   */
+
+  #parseEventToState({ event, eventDestination, typeOffers }) {
+    return {
+      ...event,
+      destination: {
+        ...eventDestination
+      },
+      offers: typeOffers.map((offer) => ({
+        ...offer,
+        isSelected: event.offers.includes(offer.id)
+      }))
+    };
+  }
+
+  #parseStateToEvent(event) {
+    return {
+      ...event,
+      destination: event.destination.id,
+      offers: event.offers.filter((offer) => offer.isSelected).map((offer) => offer.id)
+    };
+  }
 }
