@@ -1,6 +1,9 @@
 import { html } from '@src/utils/utils';
+import flatpickr from 'flatpickr';
 
 import AbstractStatefulView from '@src/framework/view/abstract-stateful-view';
+
+import 'flatpickr/dist/flatpickr.min.css';
 
 export default class EditView extends AbstractStatefulView {
   #getTypeOffers = null;
@@ -8,6 +11,9 @@ export default class EditView extends AbstractStatefulView {
 
   #handleFormSubmit = null;
   #handleArrowBtnClick = null;
+
+  #dateStartPicker = null;
+  #dateEndPicker = null;
 
   constructor({ data, getTypeOffers, getDestination, onFormSubmit, onUpArrowBtn }) {
     super();
@@ -36,6 +42,13 @@ export default class EditView extends AbstractStatefulView {
       .addEventListener('change', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination')
       .addEventListener('change', this.#destinationChangeHandler);
+
+    if (this._state.offers.length !== 0) {
+      this.element.querySelector('.event__available-offers')
+        .addEventListener('change', this.#offersChangeHandler);
+    }
+
+    this.#setDatePicker();
   }
 
   #formSubmitHandler = (evt) => {
@@ -77,6 +90,50 @@ export default class EditView extends AbstractStatefulView {
       }
     });
   };
+
+  //FIXME: Можно передавать через сохранение данных, переделать?
+  #offersChangeHandler = (evt) => {
+    if (evt.target.classList.contains('event__offer-checkbox')) {
+      this.updateElement({
+        offers: this._state.offers.map((offer) => {
+
+          if (offer.id === evt.target.value) {
+            return {
+              ...offer,
+              isSelected: evt.target.checked
+            };
+          }
+
+          return {
+            ...offer
+          };
+        })
+      });
+    }
+  };
+
+  #setDatePicker() {
+    const config = {
+      dateFormat: 'd/m/y H:i',
+      enableTime: true,
+      'time_24hr': true
+    };
+
+    this.#dateStartPicker = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        defaultDate: this._state.dateFrom,
+        ...config
+      }
+    );
+    this.#dateEndPicker = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        defaultDate: this._state.dateTo,
+        ...config
+      }
+    );
+  }
 
   /**
    * Templates
@@ -207,6 +264,7 @@ export default class EditView extends AbstractStatefulView {
 
   #createPriceFieldHtml() {
     const { basePrice } = this._state;
+
     return html`
       <div class="event__field-group  event__field-group--price">
         <label class="event__label" for="event-price-1">
