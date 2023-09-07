@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 
+//TODO: Перенести всё во view
 function getAllDestinations(events, destinations) {
   let prevValue = '';
 

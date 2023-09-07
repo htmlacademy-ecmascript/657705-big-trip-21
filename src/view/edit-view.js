@@ -12,13 +12,25 @@ export default class EditView extends AbstractStatefulView {
   #handleFormSubmit = null;
   #handleArrowBtnClick = null;
 
+  #allTypes = null;
+  #allDestinations = null;
   #dateStartPicker = null;
   #dateEndPicker = null;
 
-  constructor({ data, getTypeOffers, getDestination, onFormSubmit, onUpArrowBtn }) {
+  constructor({
+    data,
+    allTypes,
+    allDestinations,
+    getTypeOffers,
+    getDestination,
+    onFormSubmit,
+    onUpArrowBtn
+  }) {
     super();
 
     this._setState(data);
+    this.#allTypes = allTypes;
+    this.#allDestinations = allDestinations;
 
     this.#getTypeOffers = getTypeOffers;
     this.#getDestination = getDestination;
@@ -76,25 +88,22 @@ export default class EditView extends AbstractStatefulView {
   };
 
   #destinationChangeHandler = (evt) => {
-    const newDestination = this._state.allDestinations.find((destination) => destination.name === evt.target.value);
+    const newDestination = this.#allDestinations.find((destination) => destination.name === evt.target.value);
 
     if (!newDestination) {
       return;
     }
 
-    const newDestinationInfo = this.#getDestination(newDestination.id);
-
     this.updateElement({
       destination: {
-        ...newDestinationInfo
+        ...this.#getDestination(newDestination.id)
       }
     });
   };
 
-  //FIXME: Можно передавать через сохранение данных, переделать?
   #offersChangeHandler = (evt) => {
     if (evt.target.classList.contains('event__offer-checkbox')) {
-      this.updateElement({
+      this._setState({
         offers: this._state.offers.map((offer) => {
 
           if (offer.id === evt.target.value) {
@@ -112,6 +121,7 @@ export default class EditView extends AbstractStatefulView {
     }
   };
 
+  //TODO: Доделать
   #setDatePicker() {
     const config = {
       dateFormat: 'd/m/y H:i',
@@ -168,7 +178,7 @@ export default class EditView extends AbstractStatefulView {
   }
 
   #createTypeFieldHtml() {
-    const { type: currentType, allTypes } = this._state;
+    const { type: currentType } = this._state;
 
     return html`
       <div class="event__type-wrapper">
@@ -186,7 +196,7 @@ export default class EditView extends AbstractStatefulView {
         <div class="event__type-list">
           <fieldset class="event__type-group">
             <legend class="visually-hidden">Event type</legend>
-            ${allTypes.map((type) => html`
+            ${this.#allTypes.map((type) => html`
               <div class="event__type-item">
                 <input
                   id="event-type-${type}-1"
@@ -211,7 +221,7 @@ export default class EditView extends AbstractStatefulView {
   }
 
   #createDestinationFieldHtml() {
-    const { type, destination: currentDestination, allDestinations } = this._state;
+    const { type, destination: currentDestination } = this._state;
 
     return html`
       <div class="event__field-group  event__field-group--destination">
@@ -228,7 +238,7 @@ export default class EditView extends AbstractStatefulView {
         >
 
         <datalist id="destination-list-1">
-          ${allDestinations.map((destination) => html`
+          ${this.#allDestinations.map((destination) => html`
             <option value="${destination.name}"></option>
           `)}
         </datalist>

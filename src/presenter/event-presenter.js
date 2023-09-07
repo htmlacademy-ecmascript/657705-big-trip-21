@@ -38,11 +38,13 @@ export default class EventPresenter {
       event,
       eventDestination: this.#destinationsModel.getById(event.destination),
       typeOffers: this.#offersModel.getByType(event.type),
-
-      //FIXME: Нужные только для редактирования, переделать?
-      allOffers: this.#offersModel.get(),
-      allDestinations: this.#destinationsModel.get()
     };
+
+    const allTypes = this.#offersModel.get().map((offer) => offer.type);
+    const allDestinations = this.#destinationsModel.get().map((destination) => ({
+      id: destination.id,
+      name: destination.name
+    }));
 
     const prevEventComponent = this.#eventComponent;
     const prevEditEventComponent = this.#editEventComponent;
@@ -55,8 +57,12 @@ export default class EventPresenter {
 
     this.#editEventComponent = new EditView({
       data: this.#parseEventToState(this.#event),
+      allTypes,
+      allDestinations,
+
       getTypeOffers: this.#getTypeOffers,
       getDestination: this.#getDestination,
+
       onFormSubmit: this.#onFormSubmit,
       onUpArrowBtn: this.#onUpArrowBtn
     });
@@ -144,7 +150,7 @@ export default class EventPresenter {
    * State
    */
 
-  #parseEventToState({ event, eventDestination, typeOffers, allOffers, allDestinations }) {
+  #parseEventToState({ event, eventDestination, typeOffers }) {
     return {
       ...event,
       destination: {
@@ -153,11 +159,6 @@ export default class EventPresenter {
       offers: typeOffers.map((offer) => ({
         ...offer,
         isSelected: event.offers.includes(offer.id)
-      })),
-      allTypes: allOffers.map((offer) => offer.type),
-      allDestinations: allDestinations.map((destination) => ({
-        id: destination.id,
-        name: destination.name
       }))
     };
   }
@@ -167,9 +168,6 @@ export default class EventPresenter {
 
     event.destination = event.destination.id;
     event.offers = event.offers.filter((offer) => offer.isSelected).map((offer) => offer.id);
-
-    delete event.allTypes;
-    delete event.allDestinations;
 
     return event;
   }

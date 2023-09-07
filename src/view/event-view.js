@@ -1,5 +1,6 @@
 import { html } from '@src/utils/utils';
 import AbstractStatefulView from '@src/framework/view/abstract-stateful-view';
+import DateTime from '@src/utils/date-time';
 
 export default class EventView extends AbstractStatefulView {
 
@@ -60,11 +61,10 @@ export default class EventView extends AbstractStatefulView {
   }
 
   #createStartDateHtml() {
-    // TODO: dateFrom
     const { dateFrom } = this._state;
 
     return html`
-      <time class="event__date" datetime="2019-03-18">123</time>
+      <time class="event__date" datetime="${DateTime.humanizeDateTime(dateFrom)}">${DateTime.humanizeEventDate(dateFrom)}</time>
     `;
   }
 
@@ -87,16 +87,16 @@ export default class EventView extends AbstractStatefulView {
   }
 
   #createScheduleHtml() {
-    //TODO: time
+    const { dateFrom, dateTo } = this._state;
 
     return html`
       <div class="event__schedule">
         <p class="event__time">
-          <time class="event__start-time" datetime="2019-03-18T10:30">10:30</time>
+          <time class="event__start-time" datetime="2019-03-18T10:30">${DateTime.humanizeEventTime(dateFrom)}</time>
           —
-          <time class="event__end-time" datetime="2019-03-18T11:00">11:00</time>
+          <time class="event__end-time" datetime="2019-03-18T11:00">${DateTime.humanizeEventTime(dateTo)}</time>
         </p>
-        <p class="event__duration">30M</p>
+        <p class="event__duration">${DateTime.humanizeEventDiffenceTime(dateFrom, dateTo)}</p>
       </div>
     `;
   }
