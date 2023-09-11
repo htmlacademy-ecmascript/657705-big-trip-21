@@ -9,6 +9,7 @@ const Mode = {
 };
 
 export default class EventPresenter {
+  #event = null;
   #eventContainer = null;
   #handleDataChange = null;
   #handleModeChange = null;
@@ -19,7 +20,6 @@ export default class EventPresenter {
   #destinationsModel = null;
   #offersModel = null;
 
-  #event = null;
   #mode = Mode.DEFAULT;
 
   constructor({ eventContainer, destinationsModel, offersModel, onDataChange, onModeChange }) {
@@ -33,25 +33,36 @@ export default class EventPresenter {
   }
 
   init(event) {
-    this.#event = event;
 
-    const eventData = {
+    this.#event = {
       event,
       eventDestination: this.#destinationsModel.getById(event.destination),
-      typeOffers: this.#offersModel.getByType(event.type)
+      typeOffers: this.#offersModel.getByType(event.type),
     };
+
+    const allTypes = this.#offersModel.get().map((offer) => offer.type);
+    const allDestinations = this.#destinationsModel.get().map((destination) => ({
+      id: destination.id,
+      name: destination.name
+    }));
 
     const prevEventComponent = this.#eventComponent;
     const prevEditEventComponent = this.#editEventComponent;
 
     this.#eventComponent = new EventView({
-      ...eventData,
+      data: this.#parseEventToState(this.#event),
       onDownArrowBtn: this.#onDownArrowtBtn,
-      onFavoriteClick: this.#handleFavoriteClick
+      onFavoriteBtn: this.#onFavoriteBtn
     });
 
     this.#editEventComponent = new EditView({
-      ...eventData,
+      data: this.#parseEventToState(this.#event),
+      allTypes,
+      allDestinations,
+
+      getTypeOffers: this.#getTypeOffers,
+      getDestination: this.#getDestination,
+
       onFormSubmit: this.#onFormSubmit,
       onUpArrowBtn: this.#onUpArrowBtn
     });
@@ -80,6 +91,7 @@ export default class EventPresenter {
 
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
+      this.#editEventComponent.reset(this.#parseEventToState(this.#event));
       this.#showEventComponent();
     }
   }
@@ -99,31 +111,64 @@ export default class EventPresenter {
     this.#mode = Mode.EDITING;
   }
 
+  /**
+   * Handlers
+   */
+
   #onDownArrowtBtn = () => {
     this.#showEditComponent();
   };
 
-  #onFormSubmit = () => {
+  #onFormSubmit = (state) => {
+    this.#handleDataChange(this.#parseStateToEvent(state));
     this.#showEventComponent();
   };
 
   #onUpArrowBtn = () => {
+    this.#editEventComponent.reset(this.#parseEventToState(this.#event));
     this.#showEventComponent();
   };
 
-  #handleFavoriteClick = () => {
-    const changedEvent = {
-      ...this.#event,
-      isFavorite: !this.#event.isFavorite
-    };
-
-    this.#handleDataChange(changedEvent);
+  #onFavoriteBtn = (state) => {
+    const event = this.#parseStateToEvent(state);
+    this.#handleDataChange(event);
   };
+
+  #getTypeOffers = (type) => this.#offersModel.getByType(type);
+
+  #getDestination = (id) => this.#destinationsModel.getById(id);
 
   #escKeydownHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
+      this.#editEventComponent.reset(this.#parseEventToState(this.#event));
       this.#showEventComponent();
     }
   };
+
+  /**
+   * State
+   */
+
+  #parseEventToState({ event, eventDestination, typeOffers }) {
+    return {
+      ...event,
+      destination: {
+        ...eventDestination
+      },
+      offers: typeOffers.map((offer) => ({
+        ...offer,
+        isSelected: event.offers.includes(offer.id)
+      }))
+    };
+  }
+
+  #parseStateToEvent(state) {
+    const event = { ...state };
+
+    event.destination = event.destination.id;
+    event.offers = event.offers.filter((offer) => offer.isSelected).map((offer) => offer.id);
+
+    return event;
+  }
 }
