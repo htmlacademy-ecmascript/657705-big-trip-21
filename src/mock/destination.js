@@ -1,4 +1,4 @@
-import { getRandomArrayElement } from '@src/utils';
+import { getRandomArrayElement } from '@src/utils/utils';
 import { DESCRIPTIONS } from './const';
 
 function generateDestination(city) {

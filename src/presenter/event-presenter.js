@@ -1,4 +1,5 @@
 import { remove, render, replace } from '@src/framework/render';
+import { UserAction, UpdateType } from '@src/utils/const';
 
 import EventView from '@src/view/event-view';
 import EditView from '@src/view/edit-view';
@@ -64,7 +65,8 @@ export default class EventPresenter {
       getDestination: this.#getDestination,
 
       onFormSubmit: this.#onFormSubmit,
-      onUpArrowBtn: this.#onUpArrowBtn
+      onUpArrowBtn: this.#onUpArrowBtn,
+      onDeleteBtn: this.#onDeleteBtn
     });
 
     if (prevEventComponent === null || prevEditEventComponent === null) {
@@ -111,6 +113,10 @@ export default class EventPresenter {
     this.#mode = Mode.EDITING;
   }
 
+  #getTypeOffers = (type) => this.#offersModel.getByType(type);
+
+  #getDestination = (id) => this.#destinationsModel.getById(id);
+
   /**
    * Handlers
    */
@@ -120,7 +126,12 @@ export default class EventPresenter {
   };
 
   #onFormSubmit = (state) => {
-    this.#handleDataChange(this.#parseStateToEvent(state));
+    this.#handleDataChange(
+      UserAction.UPDATE_EVENT,
+      UpdateType.MINOR,
+      this.#parseStateToEvent(state)
+    );
+
     this.#showEventComponent();
   };
 
@@ -130,13 +141,20 @@ export default class EventPresenter {
   };
 
   #onFavoriteBtn = (state) => {
-    const event = this.#parseStateToEvent(state);
-    this.#handleDataChange(event);
+    this.#handleDataChange(
+      UserAction.UPDATE_EVENT,
+      UpdateType.PATCH,
+      this.#parseStateToEvent(state)
+    );
   };
 
-  #getTypeOffers = (type) => this.#offersModel.getByType(type);
-
-  #getDestination = (id) => this.#destinationsModel.getById(id);
+  #onDeleteBtn = (state) => {
+    this.#handleDataChange(
+      UserAction.DELETE_EVENT,
+      UpdateType.MINOR,
+      this.#parseStateToEvent(state)
+    );
+  };
 
   #escKeydownHandler = (evt) => {
     if (evt.key === 'Escape') {

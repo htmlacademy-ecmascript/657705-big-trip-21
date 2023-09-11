@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { getRandomInt } from '@src/utils';
+import { getRandomInt } from '@src/utils/utils';
 import { Duration } from './const';
 
 let date = dayjs().subtract(getRandomInt(0, Duration.DAY), 'day').toDate();

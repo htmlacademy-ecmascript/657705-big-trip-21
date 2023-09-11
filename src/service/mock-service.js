@@ -1,4 +1,4 @@
-import { getRandomInt, getRandomArrayElement } from '@src/utils';
+import { getRandomInt, getRandomArrayElement } from '@src/utils/utils';
 
 import { generateDestination } from '@src/mock/destination';
 import { generateOffer } from '@src/mock/offer';

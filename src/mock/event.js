@@ -1,4 +1,4 @@
-import { getRandomInt } from '@src/utils';
+import { getRandomInt } from '@src/utils/utils';
 import { Price } from './const';
 import { getDate } from './utils';
 

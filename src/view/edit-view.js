@@ -11,6 +11,7 @@ export default class EditView extends AbstractStatefulView {
 
   #handleFormSubmit = null;
   #handleArrowBtnClick = null;
+  #handleDeleteBtnClick = null;
 
   #allTypes = null;
   #allDestinations = null;
@@ -24,7 +25,8 @@ export default class EditView extends AbstractStatefulView {
     getTypeOffers,
     getDestination,
     onFormSubmit,
-    onUpArrowBtn
+    onUpArrowBtn,
+    onDeleteBtn
   }) {
     super();
 
@@ -37,6 +39,7 @@ export default class EditView extends AbstractStatefulView {
 
     this.#handleFormSubmit = onFormSubmit;
     this.#handleArrowBtnClick = onUpArrowBtn;
+    this.#handleDeleteBtnClick = onDeleteBtn;
 
     this._restoreHandlers();
   }
@@ -59,6 +62,9 @@ export default class EditView extends AbstractStatefulView {
       this.element.querySelector('.event__available-offers')
         .addEventListener('change', this.#offersChangeHandler);
     }
+
+    this.element.querySelector('.event__reset-btn')
+      .addEventListener('click', this.#deleteBtnClickHandler);
 
     this.#setDatePicker();
   }
@@ -121,7 +127,13 @@ export default class EditView extends AbstractStatefulView {
     }
   };
 
+  #deleteBtnClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteBtnClick(this._state);
+  };
+
   //TODO: Доделать
+
   #setDatePicker() {
     const config = {
       dateFormat: 'd/m/y H:i',
