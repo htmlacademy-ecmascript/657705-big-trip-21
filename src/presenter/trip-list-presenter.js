@@ -1,5 +1,6 @@
-import { render } from '@src/framework/render';
+import { remove, render } from '@src/framework/render';
 import { UserAction, UpdateType } from '@src/utils/const';
+import { filter } from '@src/utils/filter';
 
 import EventPresenter from './event-presenter';
 
@@ -10,22 +11,41 @@ import NoEventView from '@src/view/no-event-view';
 export default class TripListPresenter {
   #tripListComponent = new TripListView();
   #tripListContainer = document.querySelector('.trip-events');
+  #sortComponent = null;
+  #noEventComponent = null;
 
   #destinationsModel = null;
   #offersModel = null;
   #eventsModel = null;
+  #filterModel = null;
 
   #eventPresenters = new Map();
 
-  constructor({ destinationsModel, offersModel, eventsModel }) {
+  constructor({ destinationsModel, offersModel, eventsModel, filterModel }) {
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
     this.#eventsModel = eventsModel;
+    this.#filterModel = filterModel;
 
     this.#eventsModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   init() {
+    this.#renderEventList();
+  }
+
+  get events() {
+    const filterType = this.#filterModel.filter;
+    const events = this.#eventsModel.events;
+
+    const filteredTasks = filter[filterType](events);
+
+    return filteredTasks;
+
+  }
+
+  #renderEventList() {
 
     if (this.events.length === 0) {
       this.#renderNoEvent();
@@ -33,14 +53,7 @@ export default class TripListPresenter {
     }
 
     this.#renderSort();
-    this.#renderEventList();
-  }
 
-  get events() {
-    return this.#eventsModel.events;
-  }
-
-  #renderEventList() {
     render(this.#tripListComponent, this.#tripListContainer);
     this.events.forEach(this.#renderEvent);
   }
@@ -61,11 +74,13 @@ export default class TripListPresenter {
   };
 
   #renderNoEvent() {
-    render(new NoEventView(), this.#tripListContainer);
+    this.#noEventComponent = new NoEventView();
+    render(this.#noEventComponent, this.#tripListContainer);
   }
 
   #renderSort() {
-    render(new SortView(), this.#tripListContainer);
+    this.#sortComponent = new SortView();
+    render(this.#sortComponent, this.#tripListContainer);
   }
 
   #handleViewAction = (actionType, updateType, update) => {
@@ -106,6 +121,8 @@ export default class TripListPresenter {
         break;
       case UpdateType.MAJOR:
         // - обновить всю доску (например, при переключении фильтра)
+        this.#clearEventList();
+        this.#renderEventList();
         break;
     }
   };
@@ -113,6 +130,9 @@ export default class TripListPresenter {
   #clearEventList() {
     this.#eventPresenters.forEach((event) => event.destroy());
     this.#eventPresenters.clear();
+
+    remove(this.#sortComponent);
+    remove(this.#noEventComponent);
   }
 
   #handleModeChange = () => {
