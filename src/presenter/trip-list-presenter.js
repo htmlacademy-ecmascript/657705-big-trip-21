@@ -1,5 +1,5 @@
 import { remove, render } from '@src/framework/render';
-import { UserAction, UpdateType } from '@src/utils/const';
+import { UserAction, UpdateType, FilterType } from '@src/utils/const';
 import { filter } from '@src/utils/filter';
 
 import EventPresenter from './event-presenter';
@@ -20,6 +20,7 @@ export default class TripListPresenter {
   #filterModel = null;
 
   #eventPresenters = new Map();
+  #filterType = FilterType.EVERYTHING;
 
   constructor({ destinationsModel, offersModel, eventsModel, filterModel }) {
     this.#destinationsModel = destinationsModel;
@@ -36,10 +37,10 @@ export default class TripListPresenter {
   }
 
   get events() {
-    const filterType = this.#filterModel.filter;
+    this.#filterType = this.#filterModel.filter;
     const events = this.#eventsModel.events;
 
-    const filteredTasks = filter[filterType](events);
+    const filteredTasks = filter[this.#filterType](events);
 
     return filteredTasks;
 
@@ -74,7 +75,10 @@ export default class TripListPresenter {
   };
 
   #renderNoEvent() {
-    this.#noEventComponent = new NoEventView();
+    this.#noEventComponent = new NoEventView({
+      filterType: this.#filterType
+    });
+
     render(this.#noEventComponent, this.#tripListContainer);
   }
 
