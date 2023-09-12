@@ -4,6 +4,7 @@ import { filter } from '@src/utils/filter';
 import { sortByDaysInDescOrder, sortDurationTimeInDescOrder, sortPriceInDescOrder } from '@src/utils/sort';
 
 import EventPresenter from './event-presenter';
+import AddEventPresenter from './add-event-presenter';
 
 import SortView from '@src/view/sort-view';
 import TripListView from '@src/view/trip-list-view';
@@ -21,21 +22,30 @@ export default class TripListPresenter {
   #filterModel = null;
 
   #eventPresenters = new Map();
+  #addEventPresenter = null;
+
   #filterType = FilterType.EVERYTHING;
   #sortType = SortType.DAY;
 
-  constructor({ destinationsModel, offersModel, eventsModel, filterModel }) {
+  constructor({ destinationsModel, offersModel, eventsModel, filterModel, onAddEventDestroy }) {
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
     this.#eventsModel = eventsModel;
     this.#filterModel = filterModel;
 
+    this.#addEventPresenter = new AddEventPresenter({
+      tripListComponent: this.#tripListComponent,
+      tripListContainer: this.#tripListContainer,
+
+      onDataChange: this.#handleViewAction,
+      onDestroy: onAddEventDestroy,
+
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersModel
+    });
+
     this.#eventsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
-  }
-
-  init() {
-    this.#renderEventList();
   }
 
   get events() {
@@ -52,6 +62,16 @@ export default class TripListPresenter {
     }
 
     return filteredEvents.sort(sortByDaysInDescOrder);
+  }
+
+  init() {
+    this.#renderEventList();
+  }
+
+  addEvent() {
+    this.#sortType = SortType.DAY;
+    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this.#addEventPresenter.init();
   }
 
   #renderEventList() {
@@ -142,6 +162,7 @@ export default class TripListPresenter {
   };
 
   #clearEventList({ resetSortType = false } = {}) {
+    this.#addEventPresenter.destroy();
     this.#eventPresenters.forEach((event) => event.destroy());
     this.#eventPresenters.clear();
 
@@ -154,6 +175,7 @@ export default class TripListPresenter {
   }
 
   #handleModeChange = () => {
+    this.#addEventPresenter.destroy();
     this.#eventPresenters.forEach((presenter) => presenter.resetView());
   };
 }

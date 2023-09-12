@@ -17,6 +17,7 @@ export default class EditView extends AbstractStatefulView {
   #allDestinations = null;
   #dateStartPicker = null;
   #dateEndPicker = null;
+  #isEdit = null;
 
   constructor({
     data,
@@ -26,7 +27,8 @@ export default class EditView extends AbstractStatefulView {
     getDestination,
     onFormSubmit,
     onUpArrowBtn,
-    onDeleteBtn
+    onDeleteBtn,
+    isEdit = true
   }) {
     super();
 
@@ -41,8 +43,28 @@ export default class EditView extends AbstractStatefulView {
     this.#handleArrowBtnClick = onUpArrowBtn;
     this.#handleDeleteBtnClick = onDeleteBtn;
 
+    this.#isEdit = isEdit;
+
     this._restoreHandlers();
   }
+
+  reset(event) {
+    this.updateElement(event);
+  }
+
+  removeElement = () => {
+    super.removeElement();
+
+    if (this.#dateEndPicker) {
+      this.#dateEndPicker.destroy();
+      this.#dateEndPicker = null;
+    }
+
+    if (this.#dateStartPicker) {
+      this.#dateStartPicker.destroy();
+      this.#dateStartPicker = null;
+    }
+  };
 
   /**
    * Handlers
@@ -51,8 +73,12 @@ export default class EditView extends AbstractStatefulView {
   _restoreHandlers() {
     this.element
       .addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#arrowBtnClickHandler);
+
+    if (this.#isEdit) {
+      this.element.querySelector('.event__rollup-btn')
+        .addEventListener('click', this.#arrowBtnClickHandler);
+    }
+
     this.element.querySelector('.event__type-group')
       .addEventListener('change', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination')
@@ -65,6 +91,9 @@ export default class EditView extends AbstractStatefulView {
 
     this.element.querySelector('.event__reset-btn')
       .addEventListener('click', this.#deleteBtnClickHandler);
+
+    this.element.querySelector('.event__input--price')
+      .addEventListener('change', this.#priceChangeHandler);
 
     this.#setDatePicker();
   }
@@ -132,30 +161,60 @@ export default class EditView extends AbstractStatefulView {
     this.#handleDeleteBtnClick(this._state);
   };
 
-  //TODO: Доделать
-
   #setDatePicker() {
     const config = {
       dateFormat: 'd/m/y H:i',
       enableTime: true,
-      'time_24hr': true
+      'time_24hr': true,
+      locale: {
+        firstDayOfWeek: 1
+      }
     };
 
     this.#dateStartPicker = flatpickr(
       this.element.querySelector('#event-start-time-1'),
       {
+        ...config,
         defaultDate: this._state.dateFrom,
-        ...config
+        maxDate: this._state.dateTo,
+        onClose: this.#dateFromCloseHandler
       }
     );
+
     this.#dateEndPicker = flatpickr(
       this.element.querySelector('#event-end-time-1'),
       {
+        ...config,
         defaultDate: this._state.dateTo,
-        ...config
+        minDate: this._state.dateFrom,
+        onClose: this.#dateToCloseHandler
       }
     );
   }
+
+  #dateFromCloseHandler = ([date]) => {
+    this._setState({
+      dateFrom: date
+    });
+
+    this.#dateEndPicker.set('minDate', this._state.dateFrom);
+  };
+
+  #dateToCloseHandler = ([date]) => {
+    this._setState({
+      dateTo: date
+    });
+
+    this.#dateStartPicker.set('maxDate', this._state.dateTo);
+  };
+
+  #priceChangeHandler = (evt) => {
+    evt.preventDefault();
+
+    this._setState({
+      basePrice: evt.target.value
+    });
+  };
 
   /**
    * Templates
@@ -163,10 +222,6 @@ export default class EditView extends AbstractStatefulView {
 
   get template() {
     return this.#createEditTemplate(this._state);
-  }
-
-  reset(event) {
-    this.updateElement(event);
   }
 
   #createEditTemplate() {
@@ -312,11 +367,15 @@ export default class EditView extends AbstractStatefulView {
 
   #createResetButtonHtml() {
     return html`
-      <button class="event__reset-btn" type="reset">Delete</button>
+      <button class="event__reset-btn" type="reset">${this.#isEdit ? 'Delete' : 'Cancel'}</button>
     `;
   }
 
   #createCloseButtonHtml() {
+    if (!this.#isEdit) {
+      return;
+    }
+
     return html`
       <button class="event__rollup-btn" type="button">
         <span class="visually-hidden">Close event</span>
@@ -359,6 +418,11 @@ export default class EditView extends AbstractStatefulView {
   }
 
   #createDestinationHtml() {
+
+    if (Object.keys(this._state.destination).length === 0) {
+      return;
+    }
+
     const { description, pictures } = this._state.destination;
 
     return html`

@@ -9,7 +9,7 @@ export default class InfoPresenter {
 
   constructor({ destinationsModel, eventsModel }) {
     this.#destinations = destinationsModel.get();
-    // this.#events = eventsModel.get();
+    this.#events = eventsModel.events;
   }
 
   init() {
