@@ -1,6 +1,7 @@
 import { remove, render } from '@src/framework/render';
-import { UserAction, UpdateType, FilterType } from '@src/utils/const';
+import { UserAction, UpdateType, FilterType, SortType } from '@src/utils/const';
 import { filter } from '@src/utils/filter';
+import { sortByDaysInDescOrder, sortDurationTimeInDescOrder, sortPriceInDescOrder } from '@src/utils/sort';
 
 import EventPresenter from './event-presenter';
 
@@ -21,6 +22,7 @@ export default class TripListPresenter {
 
   #eventPresenters = new Map();
   #filterType = FilterType.EVERYTHING;
+  #sortType = SortType.DAY;
 
   constructor({ destinationsModel, offersModel, eventsModel, filterModel }) {
     this.#destinationsModel = destinationsModel;
@@ -40,10 +42,16 @@ export default class TripListPresenter {
     this.#filterType = this.#filterModel.filter;
     const events = this.#eventsModel.events;
 
-    const filteredTasks = filter[this.#filterType](events);
+    const filteredEvents = filter[this.#filterType](events);
 
-    return filteredTasks;
+    switch (this.#sortType) {
+      case SortType.PRICE:
+        return filteredEvents.sort(sortPriceInDescOrder);
+      case SortType.TIME:
+        return filteredEvents.sort(sortDurationTimeInDescOrder);
+    }
 
+    return filteredEvents.sort(sortByDaysInDescOrder);
   }
 
   #renderEventList() {
@@ -83,17 +91,25 @@ export default class TripListPresenter {
   }
 
   #renderSort() {
-    this.#sortComponent = new SortView();
+    this.#sortComponent = new SortView({
+      sortType: this.#sortType,
+      onSortTypeChange: this.#handleSortTypeChange
+    });
+
     render(this.#sortComponent, this.#tripListContainer);
   }
 
+  #handleSortTypeChange = (sortType) => {
+    if (this.#sortType === sortType) {
+      return;
+    }
+
+    this.#sortType = sortType;
+    this.#clearEventList();
+    this.#renderEventList();
+  };
+
   #handleViewAction = (actionType, updateType, update) => {
-
-    // Здесь будем вызывать обновление модели.
-    // actionType - действие пользователя, нужно чтобы понять, какой метод модели вызвать
-    // updateType - тип изменений, нужно чтобы понять, что после нужно обновить
-    // update - обновленные данные
-
     switch (actionType) {
       case UserAction.UPDATE_EVENT:
         this.#eventsModel.updateEvent(updateType, update);
@@ -110,33 +126,31 @@ export default class TripListPresenter {
   //TODO: 7.6 оптимизация, не забыть!
 
   #handleModelEvent = (updateType, data) => {
-
-    // В зависимости от типа изменений решаем, что делать:
-
     switch (updateType) {
       case UpdateType.PATCH:
-        // - обновить часть списка (например, когда поменялось описание)
         this.#eventPresenters.get(data.id).init(data);
         break;
       case UpdateType.MINOR:
-        // - обновить список (например, когда задача ушла в архив)
         this.#clearEventList();
         this.#renderEventList();
         break;
       case UpdateType.MAJOR:
-        // - обновить всю доску (например, при переключении фильтра)
-        this.#clearEventList();
+        this.#clearEventList({ resetSortType: true });
         this.#renderEventList();
         break;
     }
   };
 
-  #clearEventList() {
+  #clearEventList({ resetSortType = false } = {}) {
     this.#eventPresenters.forEach((event) => event.destroy());
     this.#eventPresenters.clear();
 
     remove(this.#sortComponent);
     remove(this.#noEventComponent);
+
+    if (resetSortType) {
+      this.#sortType = SortType.DAY;
+    }
   }
 
   #handleModeChange = () => {

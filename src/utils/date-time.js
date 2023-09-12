@@ -55,4 +55,11 @@ export default class DateTime {
   static isEventPresent(dateFrom, dateTo) {
     return dayjs(new Date()).isBetween(dateFrom, dateTo);
   }
+
+  static getDurationTime(dateFrom, dateTo) {
+    const timeStart = dayjs(dateFrom);
+    const timeEnd = dayjs(dateTo);
+
+    return timeEnd.diff(timeStart, 'millisecond', true);
+  }
 }
