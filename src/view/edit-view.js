@@ -1,5 +1,7 @@
-import { html } from '@src/utils/utils';
 import flatpickr from 'flatpickr';
+import he from 'he';
+
+import { html } from '@src/utils/utils';
 
 import AbstractStatefulView from '@src/framework/view/abstract-stateful-view';
 
@@ -123,15 +125,22 @@ export default class EditView extends AbstractStatefulView {
   };
 
   #destinationChangeHandler = (evt) => {
-    const newDestination = this.#allDestinations.find((destination) => destination.name === evt.target.value);
+    const value = he.encode(evt.target.value);
+    let destinationInfo = {};
+
+    const newDestination = this.#allDestinations.find((destination) => destination.name === value);
 
     if (!newDestination) {
-      return;
+      evt.target.value = '';
+    } else {
+      destinationInfo = {
+        ...this.#getDestination(newDestination.id)
+      };
     }
 
     this.updateElement({
       destination: {
-        ...this.#getDestination(newDestination.id)
+        ...destinationInfo
       }
     });
   };
@@ -211,8 +220,17 @@ export default class EditView extends AbstractStatefulView {
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
 
+    const value = parseInt(he.encode(evt.target.value), 10);
+
+    if (isNaN(value) || value < 0) {
+      evt.target.value = '';
+      return;
+    }
+
+    evt.target.value = value;
+
     this._setState({
-      basePrice: evt.target.value
+      basePrice: value
     });
   };
 
