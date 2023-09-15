@@ -1,3 +1,4 @@
+
 import Observable from '@src/framework/observable';
 import { UpdateType } from '@src/utils/const';
 
@@ -28,44 +29,66 @@ export default class EventsModel extends Observable {
     this._notify(UpdateType.INIT);
   }
 
-  updateEvent(updateType, update) {
+  async updateEvent(updateType, update) {
     const index = this.#events.findIndex((event) => event.id === update.id);
 
     if (index === -1) {
       throw new Error('Низя обновить несуществующий маршрут');
     }
 
-    this.#events = [
-      ...this.#events.slice(0, index),
-      update,
-      ...this.#events.slice(index + 1)
-    ];
+    try {
+      const response = await this.#eventsApiService.updateEvent(update);
+      const updatedEvent = this.#adaptToClient(response);
 
-    this._notify(updateType, update);
+      this.#events = [
+        ...this.#events.slice(0, index),
+        updatedEvent,
+        ...this.#events.slice(index + 1)
+      ];
+
+      this._notify(updateType, update);
+    } catch (err) {
+      // console.log(err);
+      throw new Error('Не получилось обновить точку маршрута');
+    }
   }
 
-  addEvent(updateType, update) {
-    this.#events = [
-      update,
-      ...this.#events
-    ];
+  async addEvent(updateType, update) {
+    try {
+      const response = await this.#eventsApiService.addEvent(update);
+      const newEvent = this.#adaptToClient(response);
 
-    this._notify(updateType, update);
+      this.#events = [
+        newEvent,
+        ...this.#events
+      ];
+
+      this._notify(updateType, update);
+
+    } catch (err) {
+      throw new Error('Не получилось добавить точку маршрута');
+    }
   }
 
-  deleteEvent(updateType, update) {
+  async deleteEvent(updateType, update) {
     const index = this.#events.findIndex((event) => event.id === update.id);
 
     if (index === -1) {
       throw new Error('Низя удалить несуществующий маршрут');
     }
 
-    this.#events = [
-      ...this.#events.slice(0, index),
-      ...this.#events.slice(index + 1)
-    ];
+    try {
+      await this.#eventsApiService.deleteEvent(update);
 
-    this._notify(updateType);
+      this.#events = [
+        ...this.#events.slice(0, index),
+        ...this.#events.slice(index + 1)
+      ];
+
+      this._notify(updateType);
+    } catch (err) {
+      throw new Error('Не получилось удалить точку маршрута');
+    }
   }
 
   #adaptToClient(event) {

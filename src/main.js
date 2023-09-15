@@ -24,7 +24,7 @@ const offersModel = new OffersModel(eventsApiService);
 const filterModel = new FilterModel();
 
 const filterPresenter = new FilterPresenter({ filterModel, eventsModel });
-// const infoPresenter = new InfoPresenter({ destinationsModel, eventsModel });
+const infoPresenter = new InfoPresenter({ destinationsModel, eventsModel });
 const tripListPresenter = new TripListPresenter({
   destinationsModel,
   offersModel,
@@ -49,8 +49,14 @@ function handleAddEventClose() {
 render(addButtonComponent, document.querySelector('.trip-main'), RenderPosition.BEFOREEND);
 
 filterPresenter.init();
-// infoPresenter.init();
+infoPresenter.init();
 tripListPresenter.init();
 
+//TODO: Обработка ошибок в моделях.
+
 Promise.all([destinationsModel.init(), offersModel.init()])
-  .then(() => eventsModel.init());
+  .then(() => {
+    eventsModel.init().finally(() => {
+      addButtonComponent.element.disabled = false;
+    });
+  });

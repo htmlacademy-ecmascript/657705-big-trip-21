@@ -1,4 +1,4 @@
-import { remove, render } from '@src/framework/render';
+import { RenderPosition, remove, render } from '@src/framework/render';
 import { UserAction, UpdateType, FilterType, SortType } from '@src/utils/const';
 import { filter } from '@src/utils/filter';
 import { sortByDaysInDescOrder, sortDurationTimeInDescOrder, sortPriceInDescOrder } from '@src/utils/sort';
@@ -9,9 +9,11 @@ import AddEventPresenter from './add-event-presenter';
 import SortView from '@src/view/sort-view';
 import TripListView from '@src/view/trip-list-view';
 import NoEventView from '@src/view/no-event-view';
+import LoadingView from '@src/view/loading-view';
 
 export default class TripListPresenter {
   #tripListComponent = new TripListView();
+  #loadingComponent = new LoadingView();
   #tripListContainer = document.querySelector('.trip-events');
   #sortComponent = null;
   #noEventComponent = null;
@@ -26,6 +28,7 @@ export default class TripListPresenter {
 
   #filterType = FilterType.EVERYTHING;
   #sortType = SortType.DAY;
+  #isLoading = true;
 
   constructor({ destinationsModel, offersModel, eventsModel, filterModel, onAddEventDestroy }) {
     this.#destinationsModel = destinationsModel;
@@ -74,7 +77,16 @@ export default class TripListPresenter {
     this.#addEventPresenter.init();
   }
 
+  #renderLoading() {
+    render(this.#loadingComponent, this.#tripListContainer, RenderPosition.BEFOREEND);
+  }
+
   #renderEventList() {
+
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
 
     if (this.events.length === 0) {
       this.#renderNoEvent();
@@ -159,8 +171,10 @@ export default class TripListPresenter {
         this.#renderEventList();
         break;
       case UpdateType.INIT:
-        remove(this.#noEventComponent);
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
         this.#renderEventList();
+        break;
     }
   };
 
@@ -171,6 +185,7 @@ export default class TripListPresenter {
 
     remove(this.#sortComponent);
     remove(this.#noEventComponent);
+    remove(this.#loadingComponent);
 
     if (resetSortType) {
       this.#sortType = SortType.DAY;

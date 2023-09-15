@@ -48,8 +48,8 @@ export default class AddEventPresenter {
       typeOffers: this.#offersModel.getByType(this.#defaultType)
     };
 
-    const allTypes = this.#offersModel.get().map((offer) => offer.type);
-    const allDestinations = this.#destinationsModel.get().map((destination) => ({
+    const allTypes = this.#offersModel.offers.map((offer) => offer.type);
+    const allDestinations = this.#destinationsModel.destinations.map((destination) => ({
       id: destination.id,
       name: destination.name
     }));
@@ -94,10 +94,7 @@ export default class AddEventPresenter {
     this.#handleDataChange(
       UserAction.ADD_EVENT,
       UpdateType.MINOR,
-      this.#parseStateToEvent({
-        id: crypto.randomUUID(),
-        ...state
-      })
+      this.#parseStateToEvent(state)
     );
 
     this.destroy();

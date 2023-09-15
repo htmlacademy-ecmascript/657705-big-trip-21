@@ -8,7 +8,7 @@ export default class InfoPresenter {
   #events = [];
 
   constructor({ destinationsModel, eventsModel }) {
-    this.#destinations = destinationsModel.get();
+    this.#destinations = destinationsModel.destinations;
     this.#events = eventsModel.events;
   }
 
