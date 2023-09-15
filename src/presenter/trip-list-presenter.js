@@ -2,6 +2,7 @@ import { RenderPosition, remove, render } from '@src/framework/render';
 import { UserAction, UpdateType, FilterType, SortType } from '@src/utils/const';
 import { filter } from '@src/utils/filter';
 import { sortByDaysInDescOrder, sortDurationTimeInDescOrder, sortPriceInDescOrder } from '@src/utils/sort';
+import UiBlocker from '@src/framework/ui-blocker/ui-blocker';
 
 import EventPresenter from './event-presenter';
 import AddEventPresenter from './add-event-presenter';
@@ -10,6 +11,11 @@ import SortView from '@src/view/sort-view';
 import TripListView from '@src/view/trip-list-view';
 import NoEventView from '@src/view/no-event-view';
 import LoadingView from '@src/view/loading-view';
+
+const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};
 
 export default class TripListPresenter {
   #tripListComponent = new TripListView();
@@ -29,6 +35,10 @@ export default class TripListPresenter {
   #filterType = FilterType.EVERYTHING;
   #sortType = SortType.DAY;
   #isLoading = true;
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER_LIMIT,
+    upperLimit: TimeLimit.UPPER_LIMIT
+  });
 
   constructor({ destinationsModel, offersModel, eventsModel, filterModel, onAddEventDestroy }) {
     this.#destinationsModel = destinationsModel;
@@ -142,6 +152,8 @@ export default class TripListPresenter {
   };
 
   #handleViewAction = async (actionType, updateType, update) => {
+    this.#uiBlocker.block();
+
     switch (actionType) {
 
       case UserAction.UPDATE_EVENT:
@@ -171,9 +183,9 @@ export default class TripListPresenter {
         }
         break;
     }
-  };
 
-  //TODO: 7.6 оптимизация, не забыть!
+    this.#uiBlocker.unblock();
+  };
 
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {

@@ -151,6 +151,10 @@ export default class AddEventPresenter {
     event.destination = event.destination.id;
     event.offers = event.offers.filter((offer) => offer.isSelected).map((offer) => offer.id);
 
+    delete event.isDisabled;
+    delete event.isSaving;
+    delete event.isDeleting;
+
     return event;
   }
 }
