@@ -90,14 +90,31 @@ export default class AddEventPresenter {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
+  setSaving() {
+    this.#editEventComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this.#editEventComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    this.#editEventComponent.shake(resetFormState);
+  }
+
   #handleFormSubmit = (state) => {
     this.#handleDataChange(
       UserAction.ADD_EVENT,
       UpdateType.MINOR,
       this.#parseStateToEvent(state)
     );
-
-    this.destroy();
   };
 
   #escKeyDownHandler = (evt) => {

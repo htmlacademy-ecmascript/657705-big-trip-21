@@ -290,6 +290,7 @@ export default class EditView extends AbstractStatefulView {
                   name="event-type"
                   value="${type}"
                   ${currentType === type ? 'checked' : ''}
+                  ${this._state.isDisabled ? 'disabled' : ''}
                 >
                 <label
                   class="event__type-label  event__type-label--${type}"
@@ -320,6 +321,7 @@ export default class EditView extends AbstractStatefulView {
           name="event-destination"
           value="${currentDestination.name}"
           list="destination-list-1"
+          ${this._state.isDisabled ? 'disabled' : ''}
         >
 
         <datalist id="destination-list-1">
@@ -343,6 +345,7 @@ export default class EditView extends AbstractStatefulView {
           type="text"
           name="event-start-time"
           value="${dateFrom}"
+          ${this._state.isDisabled ? 'disabled' : ''}
         >
         —
         <label class="visually-hidden" for="event-end-time-1">To</label>
@@ -352,6 +355,7 @@ export default class EditView extends AbstractStatefulView {
           type="text"
           name="event-end-time"
           value="${dateTo}"
+          ${this._state.isDisabled ? 'disabled' : ''}
         >
       </div>
     `;
@@ -372,6 +376,7 @@ export default class EditView extends AbstractStatefulView {
           type="text"
           name="event-price"
           value="${basePrice}"
+          ${this._state.isDisabled ? 'disabled' : ''}
         >
       </div>
     `;
@@ -379,13 +384,31 @@ export default class EditView extends AbstractStatefulView {
 
   #createSubmitButtonHtml() {
     return html`
-      <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+      <button
+        class="event__save-btn  btn  btn--blue"
+        type="submit"
+        ${this._state.isDisabled ? 'disabled' : ''}
+      >
+      ${this._state.isSaving ? 'Saving...' : 'Save'}
+      </button>
     `;
   }
 
   #createResetButtonHtml() {
+    let btnText = 'Cancel';
+
+    if (this.#isEdit) {
+      btnText = this._state.isDeleting ? 'Deleting...' : 'Delete';
+    }
+
     return html`
-      <button class="event__reset-btn" type="reset">${this.#isEdit ? 'Delete' : 'Cancel'}</button>
+      <button
+        class="event__reset-btn"
+        type="reset"
+        ${this._state.isDisabled ? 'disabled' : ''}
+      >
+        ${btnText}
+      </button>
     `;
   }
 
@@ -422,6 +445,7 @@ export default class EditView extends AbstractStatefulView {
               name="event-offer"
               value="${offer.id}"
               ${offer.isSelected ? 'checked' : ''}
+              ${this._state.isDisabled ? 'disabled' : ''}
             >
             <label class="event__offer-label" for="event-offer-${offer.id}-1">
               <span class="event__offer-title">${offer.title}</span>

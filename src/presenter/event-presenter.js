@@ -79,7 +79,8 @@ export default class EventPresenter {
     }
 
     if (this.#mode === Mode.EDITING) {
-      replace(this.#editEventComponent, prevEditEventComponent);
+      replace(this.#eventComponent, prevEventComponent);
+      this.#mode = Mode.DEFAULT;
     }
 
     remove(prevEventComponent);
@@ -96,6 +97,41 @@ export default class EventPresenter {
       this.#editEventComponent.reset(this.#parseEventToState(this.#event));
       this.#showEventComponent();
     }
+  }
+
+  setSaving() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editEventComponent.updateElement({
+        isDisabled: true,
+        isSaving: true
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editEventComponent.updateElement({
+        isDisabled: true,
+        isSaving: true
+      });
+    }
+  }
+
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#eventComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#editEventComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    this.#editEventComponent.shake(resetFormState);
   }
 
   #showEventComponent() {
@@ -131,8 +167,6 @@ export default class EventPresenter {
       UpdateType.MINOR,
       this.#parseStateToEvent(state)
     );
-
-    this.#showEventComponent();
   };
 
   #onUpArrowBtn = () => {
@@ -177,7 +211,11 @@ export default class EventPresenter {
       offers: typeOffers.map((offer) => ({
         ...offer,
         isSelected: event.offers.includes(offer.id)
-      }))
+      })),
+
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false,
     };
   }
 
@@ -186,6 +224,10 @@ export default class EventPresenter {
 
     event.destination = event.destination.id;
     event.offers = event.offers.filter((offer) => offer.isSelected).map((offer) => offer.id);
+
+    delete event.isDisabled;
+    delete event.isSaving;
+    delete event.isDeleting;
 
     return event;
   }
