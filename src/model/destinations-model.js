@@ -1,14 +1,25 @@
 export default class DestinationsModel {
-  constructor(service) {
-    this.service = service;
-    this.destinations = this.service.getDestinations();
+  #eventsApiService = null;
+  #destinations = [];
+
+  constructor(apiService) {
+    this.#eventsApiService = apiService;
   }
 
-  get() {
-    return this.destinations;
+  get destinations() {
+    return this.#destinations;
+  }
+
+  async init() {
+    try {
+      const destinations = await this.#eventsApiService.destinations;
+      this.#destinations = destinations;
+    } catch (err) {
+      this.#destinations = [];
+    }
   }
 
   getById(id) {
-    return this.destinations.find((destionation) => destionation.id === id);
+    return this.#destinations.find((destionation) => destionation.id === id);
   }
 }

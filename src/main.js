@@ -1,6 +1,7 @@
 import { RenderPosition, render } from './framework/render';
 
-import MockService from '@src/service/mock-service';
+import EventsApiService from './service/events-api-service';
+
 import DestinationsModel from '@src/model/destinations-model';
 import OffersModel from '@src/model/offers-model';
 import EventsModel from '@src/model/events-model';
@@ -12,15 +13,18 @@ import InfoPresenter from './presenter/info-presenter';
 
 import AddButtonView from './view/add-button-view';
 
-const mockService = new MockService();
-const destinationsModel = new DestinationsModel(mockService);
-const offersModel = new OffersModel(mockService);
-const eventsModel = new EventsModel(mockService);
+const AUTHORIZATION = 'Basic 8JdP2qR4zX1mL6k';
+const END_POINT = 'https://21.objects.pages.academy/big-trip';
+
+const eventsApiService = new EventsApiService(END_POINT, AUTHORIZATION);
+
+const eventsModel = new EventsModel(eventsApiService);
+const destinationsModel = new DestinationsModel(eventsApiService);
+const offersModel = new OffersModel(eventsApiService);
 const filterModel = new FilterModel();
 
-new FilterPresenter({ filterModel, eventsModel }).init();
-new InfoPresenter({ destinationsModel, eventsModel }).init();
-
+const filterPresenter = new FilterPresenter({ filterModel, eventsModel });
+// const infoPresenter = new InfoPresenter({ destinationsModel, eventsModel });
 const tripListPresenter = new TripListPresenter({
   destinationsModel,
   offersModel,
@@ -28,7 +32,6 @@ const tripListPresenter = new TripListPresenter({
   filterModel,
   onAddEventDestroy: handleAddEventClose
 });
-tripListPresenter.init();
 
 const addButtonComponent = new AddButtonView({
   onClick: handleAddButtonClick
@@ -44,3 +47,10 @@ function handleAddEventClose() {
 }
 
 render(addButtonComponent, document.querySelector('.trip-main'), RenderPosition.BEFOREEND);
+
+filterPresenter.init();
+// infoPresenter.init();
+tripListPresenter.init();
+
+Promise.all([destinationsModel.init(), offersModel.init()])
+  .then(() => eventsModel.init());

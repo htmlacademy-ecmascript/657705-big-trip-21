@@ -8,6 +8,7 @@ const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
+  INIT: 'INIT'
 };
 
 const FilterType = {
@@ -25,9 +26,22 @@ const SortType = {
   OFFER: 'offer'
 };
 
+const Method = {
+  GET: 'GET',
+  PUT: 'PUT'
+};
+
+const RequestUrl = {
+  EVENTS: 'points',
+  DESTINATIONS: 'destinations',
+  OFFERS: 'offers'
+};
+
 export {
   UpdateType,
   UserAction,
   FilterType,
-  SortType
+  SortType,
+  Method,
+  RequestUrl
 };

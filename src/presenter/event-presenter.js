@@ -41,8 +41,8 @@ export default class EventPresenter {
       typeOffers: this.#offersModel.getByType(event.type),
     };
 
-    const allTypes = this.#offersModel.get().map((offer) => offer.type);
-    const allDestinations = this.#destinationsModel.get().map((destination) => ({
+    const allTypes = this.#offersModel.offers.map((offer) => offer.type);
+    const allDestinations = this.#destinationsModel.destinations.map((destination) => ({
       id: destination.id,
       name: destination.name
     }));

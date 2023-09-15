@@ -158,6 +158,9 @@ export default class TripListPresenter {
         this.#clearEventList({ resetSortType: true });
         this.#renderEventList();
         break;
+      case UpdateType.INIT:
+        remove(this.#noEventComponent);
+        this.#renderEventList();
     }
   };
 
