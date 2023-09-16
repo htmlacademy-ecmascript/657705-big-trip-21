@@ -62,4 +62,11 @@ export default class DateTime {
 
     return timeEnd.diff(timeStart, 'millisecond', true);
   }
+
+  static getStartEndDate(dateFrom, dateTo) {
+    const startDate = dayjs(dateFrom).format('D MMM');
+    const endDate = dayjs(dateTo).format('D MMM');
+
+    return `${startDate}&nbsp;&mdash;&nbsp;${endDate}`;
+  }
 }

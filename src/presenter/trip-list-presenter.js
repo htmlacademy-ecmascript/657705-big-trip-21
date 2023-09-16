@@ -82,13 +82,14 @@ export default class TripListPresenter {
 
   init() {
     this.#renderEventList();
+    render(this.#tripListComponent, this.#tripListContainer);
   }
 
   addEvent() {
     this.#sortType = SortType.DAY;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
 
-    if (this.events.length === 0 && this.#sortComponent !== null) {
+    if (this.events.length === 0) {
       remove(this.#noEventComponent);
       this.#renderSort();
     }
@@ -130,7 +131,6 @@ export default class TripListPresenter {
 
     this.#renderSort();
 
-    render(this.#tripListComponent, this.#tripListContainer);
     this.events.forEach(this.#renderEvent);
   }
 

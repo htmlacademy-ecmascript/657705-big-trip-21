@@ -405,7 +405,6 @@ export default class EditView extends AbstractStatefulView {
     let btnText = 'Cancel';
 
     if (this.#isEdit) {
-      console.log(this._state.isDeleting);
       btnText = this._state.isDeleting ? 'Deleting...' : 'Delete';
     }
 

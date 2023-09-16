@@ -16,8 +16,6 @@ export default class EventsModel extends Observable {
     return this.#events;
   }
 
-  //TODO: Зачем вынесли в init? Вернуть в конструктор?
-
   async init() {
     try {
       const events = await this.#eventsApiService.events;

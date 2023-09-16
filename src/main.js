@@ -24,7 +24,7 @@ const offersModel = new OffersModel(eventsApiService);
 const filterModel = new FilterModel();
 
 const filterPresenter = new FilterPresenter({ filterModel, eventsModel });
-const infoPresenter = new InfoPresenter({ destinationsModel, eventsModel });
+const infoPresenter = new InfoPresenter({ destinationsModel, eventsModel, offersModel });
 const tripListPresenter = new TripListPresenter({
   destinationsModel,
   offersModel,
@@ -50,10 +50,8 @@ function handleAddEventClose() {
 render(addButtonComponent, document.querySelector('.trip-main'), RenderPosition.BEFOREEND);
 
 filterPresenter.init();
-infoPresenter.init();
 tripListPresenter.init();
-
-//TODO: Обработка ошибок в моделях.
+infoPresenter.init();
 
 Promise.all(
   [

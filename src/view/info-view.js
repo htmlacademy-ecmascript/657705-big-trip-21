@@ -1,34 +1,35 @@
-import AbstractView from '@src/framework/view/abstract-view';
-import { getAllDestinations, getStartEndDate, getTotalPrice } from '@src/utils/info-utils';
+import { html } from '@src/utils/utils';
+import DateTime from '@src/utils/date-time';
 
-function createInfoTemplate({ destinations, events }) {
-  return /* html */`
-    <section class="trip-main__trip-info  trip-info">
-      <div class="trip-info__main">
-        <h1 class="trip-info__title">${getAllDestinations(events, destinations)}</h1>
-        <p class="trip-info__dates">${getStartEndDate(events)}</p>
-      </div>
-      <p class="trip-info__cost">
-        Total: &euro;&nbsp;<span class="trip-info__cost-value">${getTotalPrice(events)}</span>
-      </p>
-    </section>
-  `;
-}
+import AbstractView from '@src/framework/view/abstract-view';
+import { getDestinationsTemplate } from '@src/utils/info';
 
 export default class InfoView extends AbstractView {
-  #destinations = [];
-  #events = [];
+  #infoData = {};
 
-  constructor({ destinations, events }) {
+  constructor({ data }) {
     super();
-    this.#destinations = destinations;
-    this.#events = events;
+
+    this.#infoData = data;
   }
 
   get template() {
-    return createInfoTemplate({
-      destinations: this.#destinations,
-      events: this.#events
-    });
+    return this.#createInfoTemplate();
+  }
+
+  #createInfoTemplate() {
+    const { date, destinations, price, length } = this.#infoData;
+
+    return html`
+      <section class="trip-main__trip-info  trip-info">
+        <div class="trip-info__main">
+          <h1 class="trip-info__title">${getDestinationsTemplate(destinations, length)}</h1>
+          <p class="trip-info__dates">${DateTime.getStartEndDate(date.from, date.to)}</p>
+        </div>
+        <p class="trip-info__cost">
+          Total: &euro;&nbsp;<span class="trip-info__cost-value">${price}</span>
+        </p>
+      </section>
+    `;
   }
 }
