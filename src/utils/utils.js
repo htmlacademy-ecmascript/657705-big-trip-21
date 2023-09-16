@@ -14,4 +14,6 @@ function html(strings, ...values) {
   });
 }
 
-export { html };
+export {
+  html
+};

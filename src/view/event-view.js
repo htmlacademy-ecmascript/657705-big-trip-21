@@ -47,16 +47,18 @@ export default class EventView extends AbstractStatefulView {
 
   #createEventTemplate() {
     return html`
-      <div class="event">
-        ${this.#createStartDateHtml()}
-        ${this.#createTypeIconHtml()}
-        ${this.#createDestinationHtml()}
-        ${this.#createScheduleHtml()}
-        ${this.#createPriceHtml()}
-        ${this.#createOfferListHtml()}
-        ${this.#createFavoriteButtonHtml()}
-        ${this.#createOpenButtonHtml()}
-      </div>
+      <li class="trip-events__item">
+        <div class="event">
+          ${this.#createStartDateHtml()}
+          ${this.#createTypeIconHtml()}
+          ${this.#createDestinationHtml()}
+          ${this.#createScheduleHtml()}
+          ${this.#createPriceHtml()}
+          ${this.#createOfferListHtml()}
+          ${this.#createFavoriteButtonHtml()}
+          ${this.#createOpenButtonHtml()}
+        </div>
+      </li>
     `;
   }
 

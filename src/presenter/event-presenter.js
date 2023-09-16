@@ -1,4 +1,5 @@
 import { remove, render, replace } from '@src/framework/render';
+import { UserAction, UpdateType } from '@src/utils/const';
 
 import EventView from '@src/view/event-view';
 import EditView from '@src/view/edit-view';
@@ -40,8 +41,8 @@ export default class EventPresenter {
       typeOffers: this.#offersModel.getByType(event.type),
     };
 
-    const allTypes = this.#offersModel.get().map((offer) => offer.type);
-    const allDestinations = this.#destinationsModel.get().map((destination) => ({
+    const allTypes = this.#offersModel.offers.map((offer) => offer.type);
+    const allDestinations = this.#destinationsModel.destinations.map((destination) => ({
       id: destination.id,
       name: destination.name
     }));
@@ -64,7 +65,8 @@ export default class EventPresenter {
       getDestination: this.#getDestination,
 
       onFormSubmit: this.#onFormSubmit,
-      onUpArrowBtn: this.#onUpArrowBtn
+      onUpArrowBtn: this.#onUpArrowBtn,
+      onDeleteBtn: this.#onDeleteBtn
     });
 
     if (prevEventComponent === null || prevEditEventComponent === null) {
@@ -77,7 +79,8 @@ export default class EventPresenter {
     }
 
     if (this.#mode === Mode.EDITING) {
-      replace(this.#editEventComponent, prevEditEventComponent);
+      replace(this.#eventComponent, prevEventComponent);
+      this.#mode = Mode.DEFAULT;
     }
 
     remove(prevEventComponent);
@@ -96,6 +99,41 @@ export default class EventPresenter {
     }
   }
 
+  setSaving() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editEventComponent.updateElement({
+        isDisabled: true,
+        isSaving: true
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editEventComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true
+      });
+    }
+  }
+
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#eventComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#editEventComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    this.#editEventComponent.shake(resetFormState);
+  }
+
   #showEventComponent() {
     replace(this.#eventComponent, this.#editEventComponent);
     document.removeEventListener('keydown', this.#escKeydownHandler);
@@ -111,6 +149,10 @@ export default class EventPresenter {
     this.#mode = Mode.EDITING;
   }
 
+  #getTypeOffers = (type) => this.#offersModel.getByType(type);
+
+  #getDestination = (id) => this.#destinationsModel.getById(id);
+
   /**
    * Handlers
    */
@@ -120,8 +162,11 @@ export default class EventPresenter {
   };
 
   #onFormSubmit = (state) => {
-    this.#handleDataChange(this.#parseStateToEvent(state));
-    this.#showEventComponent();
+    this.#handleDataChange(
+      UserAction.UPDATE_EVENT,
+      UpdateType.MINOR,
+      this.#parseStateToEvent(state)
+    );
   };
 
   #onUpArrowBtn = () => {
@@ -130,13 +175,20 @@ export default class EventPresenter {
   };
 
   #onFavoriteBtn = (state) => {
-    const event = this.#parseStateToEvent(state);
-    this.#handleDataChange(event);
+    this.#handleDataChange(
+      UserAction.UPDATE_EVENT,
+      UpdateType.PATCH,
+      this.#parseStateToEvent(state)
+    );
   };
 
-  #getTypeOffers = (type) => this.#offersModel.getByType(type);
-
-  #getDestination = (id) => this.#destinationsModel.getById(id);
+  #onDeleteBtn = (state) => {
+    this.#handleDataChange(
+      UserAction.DELETE_EVENT,
+      UpdateType.MINOR,
+      this.#parseStateToEvent(state)
+    );
+  };
 
   #escKeydownHandler = (evt) => {
     if (evt.key === 'Escape') {
@@ -159,7 +211,11 @@ export default class EventPresenter {
       offers: typeOffers.map((offer) => ({
         ...offer,
         isSelected: event.offers.includes(offer.id)
-      }))
+      })),
+
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false,
     };
   }
 
@@ -168,6 +224,10 @@ export default class EventPresenter {
 
     event.destination = event.destination.id;
     event.offers = event.offers.filter((offer) => offer.isSelected).map((offer) => offer.id);
+
+    delete event.isDisabled;
+    delete event.isSaving;
+    delete event.isDeleting;
 
     return event;
   }

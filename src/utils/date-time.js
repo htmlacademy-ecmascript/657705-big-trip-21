@@ -1,7 +1,14 @@
 import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration.js';
+import duration from 'dayjs/plugin/duration';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import isBetween from 'dayjs/plugin/isBetween';
+
 
 dayjs.extend(duration);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isBetween);
 
 export default class DateTime {
   static #DATE_FORMAT = 'MMM D';
@@ -37,4 +44,29 @@ export default class DateTime {
     }
   }
 
+  static isEventFuture(dateFrom) {
+    return dayjs(dateFrom).isSameOrAfter(new Date());
+  }
+
+  static isEventPast(dateTo) {
+    return dayjs(dateTo).isSameOrBefore(new Date());
+  }
+
+  static isEventPresent(dateFrom, dateTo) {
+    return dayjs(new Date()).isBetween(dateFrom, dateTo);
+  }
+
+  static getDurationTime(dateFrom, dateTo) {
+    const timeStart = dayjs(dateFrom);
+    const timeEnd = dayjs(dateTo);
+
+    return timeEnd.diff(timeStart, 'millisecond', true);
+  }
+
+  static getStartEndDate(dateFrom, dateTo) {
+    const startDate = dayjs(dateFrom).format('D MMM');
+    const endDate = dayjs(dateTo).format('D MMM');
+
+    return `${startDate}&nbsp;&mdash;&nbsp;${endDate}`;
+  }
 }
