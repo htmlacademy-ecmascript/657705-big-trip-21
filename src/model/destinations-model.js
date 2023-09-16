@@ -16,6 +16,7 @@ export default class DestinationsModel {
       this.#destinations = destinations;
     } catch (err) {
       this.#destinations = [];
+      throw new Error('Ошибка при загрузке данных');
     }
   }
 

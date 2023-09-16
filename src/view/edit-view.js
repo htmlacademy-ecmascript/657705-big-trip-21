@@ -244,21 +244,23 @@ export default class EditView extends AbstractStatefulView {
 
   #createEditTemplate() {
     return html`
-      <form class="event event--edit" action="#" method="post">
-        <header class="event__header">
-          ${this.#createTypeFieldHtml()}
-          ${this.#createDestinationFieldHtml()}
-          ${this.#createScheduleFieldHtml()}
-          ${this.#createPriceFieldHtml()}
-          ${this.#createSubmitButtonHtml()}
-          ${this.#createResetButtonHtml()}
-          ${this.#createCloseButtonHtml()}
-        </header>
-        <section class="event__details">
-          ${this.#createOfferListFieldHtml()}
-          ${this.#createDestinationHtml()}
-        </section>
-      </form>
+      <li class="trip-events__item">
+        <form class="event event--edit" action="#" method="post">
+          <header class="event__header">
+            ${this.#createTypeFieldHtml()}
+            ${this.#createDestinationFieldHtml()}
+            ${this.#createScheduleFieldHtml()}
+            ${this.#createPriceFieldHtml()}
+            ${this.#createSubmitButtonHtml()}
+            ${this.#createResetButtonHtml()}
+            ${this.#createCloseButtonHtml()}
+          </header>
+          <section class="event__details">
+            ${this.#createOfferListFieldHtml()}
+            ${this.#createDestinationHtml()}
+          </section>
+        </form>
+      </li>
     `;
   }
 
@@ -277,7 +279,12 @@ export default class EditView extends AbstractStatefulView {
             alt="Event type icon"
           >
         </label>
-        <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+        <input
+          class="event__type-toggle  visually-hidden"
+          id="event-type-toggle-1"
+          type="checkbox"
+          ${this._state.isDisabled ? 'disabled' : ''}
+        >
         <div class="event__type-list">
           <fieldset class="event__type-group">
             <legend class="visually-hidden">Event type</legend>
@@ -398,6 +405,7 @@ export default class EditView extends AbstractStatefulView {
     let btnText = 'Cancel';
 
     if (this.#isEdit) {
+      console.log(this._state.isDeleting);
       btnText = this._state.isDeleting ? 'Deleting...' : 'Delete';
     }
 
@@ -418,7 +426,11 @@ export default class EditView extends AbstractStatefulView {
     }
 
     return html`
-      <button class="event__rollup-btn" type="button">
+      <button
+        class="event__rollup-btn"
+        type="button"
+        ${this._state.isDisabled ? 'disabled' : ''}
+      >
         <span class="visually-hidden">Close event</span>
       </button>
     `;
@@ -460,24 +472,25 @@ export default class EditView extends AbstractStatefulView {
   }
 
   #createDestinationHtml() {
+    const { description, pictures } = this._state.destination;
 
-    if (Object.keys(this._state.destination).length === 0) {
+    if (Object.keys(this._state.destination).length === 0 || description.length === 0) {
       return;
     }
-
-    const { description, pictures } = this._state.destination;
 
     return html`
       <section class="event__section  event__section--destination">
         <h3 class="event__section-title  event__section-title--destination">Destination</h3>
         <p class="event__destination-description">${description}</p>
-        <div class="event__photos-container">
-          <div class="event__photos-tape">
-            ${pictures.map((picture) => html`
-              <img class="event__photo" src="${picture.src}" alt="${picture.description}">
-            `)}
+        ${pictures.length !== 0 ? html`
+          <div class="event__photos-container">
+            <div class="event__photos-tape">
+              ${pictures.map((picture) => html`
+                <img class="event__photo" src="${picture.src}" alt="${picture.description}">
+              `)}
+            </div>
           </div>
-        </div>
+        ` : ''}
       </section>
     `;
   }

@@ -112,7 +112,7 @@ export default class EventPresenter {
     if (this.#mode === Mode.EDITING) {
       this.#editEventComponent.updateElement({
         isDisabled: true,
-        isSaving: true
+        isDeleting: true
       });
     }
   }

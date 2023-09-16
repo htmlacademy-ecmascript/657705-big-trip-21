@@ -43,6 +43,7 @@ function handleAddButtonClick() {
 }
 
 function handleAddEventClose() {
+  tripListPresenter.closeAddEvent();
   addButtonComponent.element.disabled = false;
 }
 
@@ -54,9 +55,17 @@ tripListPresenter.init();
 
 //TODO: Обработка ошибок в моделях.
 
-Promise.all([destinationsModel.init(), offersModel.init()])
+Promise.all(
+  [
+    destinationsModel.init(),
+    offersModel.init(),
+    eventsModel.init()
+  ]
+)
   .then(() => {
-    eventsModel.init().finally(() => {
-      addButtonComponent.element.disabled = false;
-    });
+    eventsModel.start();
+    addButtonComponent.element.disabled = false;
+  })
+  .catch(() => {
+    eventsModel.failed();
   });

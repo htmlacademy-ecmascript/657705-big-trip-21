@@ -11,6 +11,7 @@ import SortView from '@src/view/sort-view';
 import TripListView from '@src/view/trip-list-view';
 import NoEventView from '@src/view/no-event-view';
 import LoadingView from '@src/view/loading-view';
+import FailedView from '@src/view/failed-view';
 
 const TimeLimit = {
   LOWER_LIMIT: 350,
@@ -20,6 +21,7 @@ const TimeLimit = {
 export default class TripListPresenter {
   #tripListComponent = new TripListView();
   #loadingComponent = new LoadingView();
+  #failedComponent = new FailedView();
   #tripListContainer = document.querySelector('.trip-events');
   #sortComponent = null;
   #noEventComponent = null;
@@ -35,6 +37,7 @@ export default class TripListPresenter {
   #filterType = FilterType.EVERYTHING;
   #sortType = SortType.DAY;
   #isLoading = true;
+  #isFailed = true;
   #uiBlocker = new UiBlocker({
     lowerLimit: TimeLimit.LOWER_LIMIT,
     upperLimit: TimeLimit.UPPER_LIMIT
@@ -84,17 +87,39 @@ export default class TripListPresenter {
   addEvent() {
     this.#sortType = SortType.DAY;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+
+    if (this.events.length === 0 && this.#sortComponent !== null) {
+      remove(this.#noEventComponent);
+      this.#renderSort();
+    }
+
     this.#addEventPresenter.init();
+  }
+
+  closeAddEvent() {
+    if (this.events.length === 0) {
+      remove(this.#sortComponent);
+      this.#renderNoEvent();
+    }
   }
 
   #renderLoading() {
     render(this.#loadingComponent, this.#tripListContainer, RenderPosition.BEFOREEND);
   }
 
+  #renderFailed() {
+    render(this.#failedComponent, this.#tripListContainer, RenderPosition.BEFOREEND);
+  }
+
   #renderEventList() {
 
     if (this.#isLoading) {
       this.#renderLoading();
+      return;
+    }
+
+    if (this.#isFailed) {
+      this.#renderFailed();
       return;
     }
 
@@ -138,7 +163,7 @@ export default class TripListPresenter {
       onSortTypeChange: this.#handleSortTypeChange
     });
 
-    render(this.#sortComponent, this.#tripListContainer);
+    render(this.#sortComponent, this.#tripListContainer, RenderPosition.AFTERBEGIN);
   }
 
   #handleSortTypeChange = (sortType) => {
@@ -202,9 +227,15 @@ export default class TripListPresenter {
         break;
       case UpdateType.INIT:
         this.#isLoading = false;
+        this.#isFailed = false;
         remove(this.#loadingComponent);
+        remove(this.#failedComponent);
         this.#renderEventList();
         break;
+      case UpdateType.FAILED:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#renderEventList();
     }
   };
 
