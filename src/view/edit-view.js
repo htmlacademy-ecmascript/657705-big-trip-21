@@ -1,6 +1,4 @@
 import flatpickr from 'flatpickr';
-// import he from 'he';
-
 import { html } from '@src/utils/utils';
 
 import AbstractStatefulView from '@src/framework/view/abstract-stateful-view';
