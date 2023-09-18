@@ -16,8 +16,6 @@ export default class SortView extends AbstractView {
       .addEventListener('click', this.#sortTypeChangeHandler);
   }
 
-  //TODO: Клики идут по всем, доделать
-
   #sortTypeChangeHandler = (evt) => {
     evt.preventDefault();
     if (!evt.target.classList.contains('trip-sort__btn')) {
